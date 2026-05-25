@@ -8,7 +8,9 @@ from telegram.ext import (
     filters,
 )
 
-TOKEN = "8391542912:AAH1cduJ0E7naPhA0z6uezCgkbLn1BjyQDE"
+import os
+
+TOKEN = os.getenv("TOKEN")
 
 CANAL = "-1003914285353"
 
