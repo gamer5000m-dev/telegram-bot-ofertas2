@@ -54,7 +54,7 @@ async def responder(update, context):
 
 #promoção #ofertas #desconto
 
-{link}
+<a href="{link}">⠀</a>
 """
 
     teclado = [
