@@ -71,13 +71,23 @@ async def responder(update, context):
 
     reply_markup = InlineKeyboardMarkup(teclado)
 
-    await context.bot.send_photo(
-    chat_id=CANAL,
-    photo=link,
-    caption=mensagem,
-    parse_mode="HTML",
-    reply_markup=reply_markup
-)
+    try:
+        await context.bot.send_photo(
+            chat_id=CANAL,
+            photo=link,
+            caption=mensagem,
+            parse_mode="HTML",
+            reply_markup=reply_markup
+        )
+
+    except:
+        await context.bot.send_message(
+            chat_id=CANAL,
+            text=mensagem,
+            parse_mode="HTML",
+            disable_web_page_preview=False,
+            reply_markup=reply_markup
+        )
 
 
 app = Application.builder().token(TOKEN).build()
