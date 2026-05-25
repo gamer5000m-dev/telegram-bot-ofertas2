@@ -21,7 +21,10 @@ async def responder(update, context):
     if "http" not in link:
         return
 
-    link = requests.get(link).url.split("?")[0]
+    link = requests.get(
+    link,
+    headers={"User-Agent": "Mozilla/5.0"}
+).url.split("?")[0]
 
     if "shopee" in link:
         loja = "🛍 OFERTA SHOPEE"
