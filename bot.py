@@ -18,7 +18,7 @@ import os
 
 TOKEN = os.getenv("TOKEN")
 
-CANAL = "-1003914285353"
+CANAL = "-100SEU_CANAL"
 
 
 def pegar_titulo(url):
@@ -89,7 +89,6 @@ def pegar_titulo(url):
 
             else:
                 titulo = "Oferta imperdível"
-            
 
         return titulo[:80]
 
@@ -125,17 +124,18 @@ async def responder(update, context):
 
         else:
             loja = "🔥 SUPER OFERTA"
-       
- frases = [
-        "🔥 Oferta relâmpago",
-        "⚠️ Últimas unidades",
-        "💥 Preço promocional",
-        "🚀 Aproveite agora",
-        "🤑 Desconto disponível",
-        "🎯 Oferta do dia"
-    ]
 
-    frase = random.choice(frases)
+        frases = [
+            "🔥 Oferta relâmpago",
+            "⚠️ Últimas unidades",
+            "💥 Preço promocional",
+            "🚀 Aproveite agora",
+            "🤑 Desconto disponível",
+            "🎯 Oferta do dia"
+        ]
+
+        frase = random.choice(frases)
+
         mensagem = f"""
 ━━━━━━━━━━━━━━━
 
