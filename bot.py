@@ -1,147 +1,56 @@
-import requests
-
-from telegram.ext import (
-    Application,
-    MessageHandler,
-    filters,
-)
-
+from telethon import TelegramClient, events
+import re
 import os
 
-TOKEN = os.getenv("TOKEN")
+# API TELEGRAM
+api_id = int(os.getenv("API_ID"))
+api_hash = os.getenv("API_HASH")
 
-CANAL = "-1003914285353"
+# SEU CANAL
+canal_destino = "-1003914285353"
 
+# CANAIS QUE VAI MONITORAR
+canais_monitorados = [
+    "canaldeofertasecupons"
+]
 
-async def responder(update, context):
-
-    try:
-
-        # FOTO + LEGENDA
-        if update.message.photo:
-
-            if not update.message.caption:
-                print("Sem legenda")
-                return
-
-            texto = update.message.caption.splitlines()
-
-            foto = update.message.photo[-1].file_id
-
-        # SOMENTE TEXTO
-        else:
-
-            if not update.message.text:
-                print("Sem texto")
-                return
-
-            texto = update.message.text.splitlines()
-
-            foto = None
-
-        print(texto)
-
-        # FORMATO MÍNIMO
-        if len(texto) < 2:
-
-            print("Formato inválido")
-
-            return
-
-        # NOME DO PRODUTO
-        titulo = texto[0].strip()
-
-        # LINK
-        link = texto[1].strip()
-
-        # VALIDA LINK
-        if "http" not in link:
-
-            print("Link inválido")
-
-            return
-
-        # PREÇO
-        preco = "💰 Confira a oferta"
-
-        if len(texto) >= 3:
-
-            if texto[2].strip() != "":
-                preco = f"💰 R$ {texto[2].strip()}"
-
-        # CUPOM OPCIONAL
-        cupom = ""
-
-        if len(texto) >= 4:
-            cupom = texto[3].strip()
-
-        # TESTA LINK
-        try:
-
-            requests.get(
-                link,
-                headers={
-                    "User-Agent": "Mozilla/5.0"
-                },
-                timeout=10
-            )
-
-        except Exception as erro:
-
-            print(erro)
-
-        # MENSAGEM
-        mensagem = f"""
-🛍 {titulo}
-
-{preco}
-"""
-
-        # CUPOM
-        if cupom != "":
-
-            mensagem += f"""
-
-🎟 CUPOM: {cupom}
-"""
-
-        # LINK
-        mensagem += f"""
-
-🔗 {link}
-"""
-
-        # ENVIA FOTO
-        if foto:
-
-            await context.bot.send_photo(
-                chat_id=CANAL,
-                photo=foto,
-                caption=mensagem
-            )
-
-        # ENVIA TEXTO
-        else:
-
-            await context.bot.send_message(
-                chat_id=CANAL,
-                text=mensagem,
-                disable_web_page_preview=False
-            )
-
-        print("Mensagem enviada")
-
-    except Exception as e:
-
-        print("ERRO:", e)
-
-
-app = Application.builder().token(TOKEN).build()
-
-app.add_handler(
-    MessageHandler(filters.ALL, responder)
+client = TelegramClient(
+    "bot",
+    api_id,
+    api_hash
 )
 
-print("BOT ONLINE!")
+@client.on(
+    events.NewMessage(
+        chats=canais_monitorados
+    )
+)
+async def handler(event):
 
-app.run_polling()
+    texto = event.raw_text
+
+    # PEGA LINKS
+    links = re.findall(
+        r'https?://\S+',
+        texto
+    )
+
+    # IGNORA SEM LINK
+    if not links:
+        return
+
+    # REPOSTA
+    await client.send_message(
+        canal_destino,
+        texto,
+        link_preview=True
+    )
+
+    print("Oferta enviada")
+
+
+print("MONITORANDO...")
+
+client.start()
+
+client.run_until_disconnected()
