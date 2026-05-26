@@ -22,6 +22,7 @@ CANAL = "-1003914285353"
 
 def pegar_titulo(url):
     try:
+
         headers = {
             "User-Agent": "Mozilla/5.0"
         }
@@ -105,6 +106,7 @@ def pegar_titulo(url):
 
 def pegar_imagem(url):
     try:
+
         headers = {
             "User-Agent": "Mozilla/5.0"
         }
@@ -124,14 +126,24 @@ def pegar_imagem(url):
 
         imagem = None
 
-        # PEGA og:image
-        meta = soup.find(
-            "meta",
-            property="og:image"
-        )
+        # AMAZON
+        if "amazon" in url:
 
-        if meta:
-            imagem = meta.get("content")
+            img = soup.find(id="landingImage")
+
+            if img:
+                imagem = img.get("src")
+
+        # OUTRAS LOJAS
+        else:
+
+            meta = soup.find(
+                "meta",
+                property="og:image"
+            )
+
+            if meta:
+                imagem = meta.get("content")
 
         # FALLBACK
         if not imagem:
@@ -148,6 +160,7 @@ def pegar_imagem(url):
 
 
 async def responder(update, context):
+
     try:
 
         texto = update.message.text.splitlines()
@@ -168,7 +181,8 @@ async def responder(update, context):
 
         link = requests.get(
             link,
-            headers={"User-Agent": "Mozilla/5.0"}
+            headers={"User-Agent": "Mozilla/5.0"},
+            allow_redirects=True
         ).url.split("?")[0]
 
         titulo = pegar_titulo(link)
@@ -197,16 +211,27 @@ async def responder(update, context):
 
         reply_markup = InlineKeyboardMarkup(teclado)
 
-        if imagem:
+        try:
 
-            await context.bot.send_photo(
-                chat_id=CANAL,
-                photo=imagem,
-                caption=mensagem,
-                reply_markup=reply_markup
-            )
+            if imagem:
 
-        else:
+                await context.bot.send_photo(
+                    chat_id=CANAL,
+                    photo=imagem,
+                    caption=mensagem,
+                    reply_markup=reply_markup
+                )
+
+            else:
+
+                await context.bot.send_message(
+                    chat_id=CANAL,
+                    text=mensagem,
+                    disable_web_page_preview=False,
+                    reply_markup=reply_markup
+                )
+
+        except:
 
             await context.bot.send_message(
                 chat_id=CANAL,
@@ -221,7 +246,9 @@ async def responder(update, context):
 
 app = Application.builder().token(TOKEN).build()
 
-app.add_handler(MessageHandler(filters.TEXT, responder))
+app.add_handler(
+    MessageHandler(filters.TEXT, responder)
+)
 
 print("BOT ONLINE!")
 
