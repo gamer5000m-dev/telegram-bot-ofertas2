@@ -46,6 +46,6 @@ async def handler(event):
 
 print("MONITORANDO...")
 
-client.start()
+client.start(phone="+5561994348181")
 
 client.run_until_disconnected()
