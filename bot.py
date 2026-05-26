@@ -16,7 +16,7 @@ import os
 
 TOKEN = os.getenv("TOKEN")
 
-CANAL = ""
+CANAL = "-1003914285353"
 
 
 def pegar_titulo(url):
@@ -53,34 +53,35 @@ def pegar_titulo(url):
 
 
 async def responder(update, context):
-    link = update.message.text
+    try:
+        link = update.message.text
 
-    if "http" not in link:
-        return
+        if "http" not in link:
+            return
 
-    link = requests.get(
-        link,
-        headers={"User-Agent": "Mozilla/5.0"}
-    ).url.split("?")[0]
+        link = requests.get(
+            link,
+            headers={"User-Agent": "Mozilla/5.0"}
+        ).url.split("?")[0]
 
-    titulo = pegar_titulo(link)
+        titulo = pegar_titulo(link)
 
-    if "shopee" in link:
-        loja = "🛍 OFERTA SHOPEE"
+        if "shopee" in link:
+            loja = "🛍 OFERTA SHOPEE"
 
-    elif "amazon" in link:
-        loja = "📦 OFERTA AMAZON"
+        elif "amazon" in link:
+            loja = "📦 OFERTA AMAZON"
 
-    elif "mercadolivre" in link or "meli" in link:
-        loja = "🛒 OFERTA MERCADO LIVRE"
+        elif "mercadolivre" in link or "meli" in link:
+            loja = "🛒 OFERTA MERCADO LIVRE"
 
-    elif "shein" in link:
-        loja = "👗 OFERTA SHEIN"
+        elif "shein" in link:
+            loja = "👗 OFERTA SHEIN"
 
-    else:
-        loja = "🔥 SUPER OFERTA"
+        else:
+            loja = "🔥 SUPER OFERTA"
 
-    mensagem = f"""
+        mensagem = f"""
 ━━━━━━━━━━━━━━━
 
 {loja}
@@ -96,24 +97,27 @@ async def responder(update, context):
 <a href="{link}">⠀</a>
 """
 
-    teclado = [
-        [
-            InlineKeyboardButton(
-                "🛒 COMPRAR AGORA",
-                url=link
-            )
+        teclado = [
+            [
+                InlineKeyboardButton(
+                    "🛒 COMPRAR AGORA",
+                    url=link
+                )
+            ]
         ]
-    ]
 
-    reply_markup = InlineKeyboardMarkup(teclado)
+        reply_markup = InlineKeyboardMarkup(teclado)
 
-    await context.bot.send_message(
-        chat_id=CANAL,
-        text=mensagem,
-        parse_mode="HTML",
-        disable_web_page_preview=False,
-        reply_markup=reply_markup
-    )
+        await context.bot.send_message(
+            chat_id=CANAL,
+            text=mensagem,
+            parse_mode="HTML",
+            disable_web_page_preview=False,
+            reply_markup=reply_markup
+        )
+
+    except Exception as e:
+        print(e)
 
 
 app = Application.builder().token(TOKEN).build()
