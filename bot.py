@@ -1,3 +1,4 @@
+import random
 import requests
 import cloudscraper
 from bs4 import BeautifulSoup
@@ -124,7 +125,17 @@ async def responder(update, context):
 
         else:
             loja = "🔥 SUPER OFERTA"
+       
+ frases = [
+        "🔥 Oferta relâmpago",
+        "⚠️ Últimas unidades",
+        "💥 Preço promocional",
+        "🚀 Aproveite agora",
+        "🤑 Desconto disponível",
+        "🎯 Oferta do dia"
+    ]
 
+    frase = random.choice(frases)
         mensagem = f"""
 ━━━━━━━━━━━━━━━
 
