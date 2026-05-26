@@ -36,50 +36,48 @@ def pegar_titulo(url):
             "html.parser"
         )
 
-        if soup.title:
-            titulo = soup.title.text.strip()
+        titulo = ""
 
-            titulo = titulo.replace("| Amazon.com.br", "")
-            titulo = titulo.replace("- Mercado Livre", "")
-            titulo = titulo.replace("| Shopee Brasil", "")
-            titulo = titulo.replace("| SHEIN Brasil", "")
+        # AMAZON
+        if "amazon" in url:
+            produto = soup.find(id="productTitle")
 
-            return titulo[:80]
+            if produto:
+                titulo = produto.get_text().strip()
 
-        return "Oferta imperdível"
+        # MERCADO LIVRE
+        elif "mercadolivre" in url:
+            produto = soup.find("h1")
+
+            if produto:
+                titulo = produto.get_text().strip()
+
+        # SHOPEE
+        elif "shopee" in url:
+            if soup.title:
+                titulo = soup.title.text.strip()
+
+                titulo = titulo.replace("| Shopee Brasil", "")
+
+        # SHEIN
+        elif "shein" in url:
+            if soup.title:
+                titulo = soup.title.text.strip()
+
+                titulo = titulo.replace("| SHEIN Brasil", "")
+
+        # PADRÃO
+        else:
+            if soup.title:
+                titulo = soup.title.text.strip()
+
+        if titulo == "":
+            titulo = "Oferta imperdível"
+
+        return titulo[:80]
 
     except:
         return "Oferta imperdível"
-
-
-async def responder(update, context):
-    try:
-        link = update.message.text
-
-        if "http" not in link:
-            return
-
-        link = requests.get(
-            link,
-            headers={"User-Agent": "Mozilla/5.0"}
-        ).url.split("?")[0]
-
-        titulo = pegar_titulo(link)
-
-        if "shopee" in link:
-            loja = "🛍 OFERTA SHOPEE"
-
-        elif "amazon" in link:
-            loja = "📦 OFERTA AMAZON"
-
-        elif "mercadolivre" in link or "meli" in link:
-            loja = "🛒 OFERTA MERCADO LIVRE"
-
-        elif "shein" in link:
-            loja = "👗 OFERTA SHEIN"
-
-        else:
-            loja = "🔥 SUPER OFERTA"
 
         mensagem = f"""
 ━━━━━━━━━━━━━━━
