@@ -124,37 +124,22 @@ def pegar_imagem(url):
 
         imagem = None
 
-        # AMAZON
-        if "amazon" in url:
+        # PEGA og:image
+        meta = soup.find(
+            "meta",
+            property="og:image"
+        )
 
-            img = soup.find(id="landingImage")
+        if meta:
+            imagem = meta.get("content")
+
+        # FALLBACK
+        if not imagem:
+
+            img = soup.find("img")
 
             if img:
                 imagem = img.get("src")
-
-        # MERCADO LIVRE
-        elif "mercadolivre" in url:
-
-            img = soup.find("meta", property="og:image")
-
-            if img:
-                imagem = img.get("content")
-
-        # SHOPEE
-        elif "shopee" in url:
-
-            img = soup.find("meta", property="og:image")
-
-            if img:
-                imagem = img.get("content")
-
-        # SHEIN
-        elif "shein" in url:
-
-            img = soup.find("meta", property="og:image")
-
-            if img:
-                imagem = img.get("content")
 
         return imagem
 
