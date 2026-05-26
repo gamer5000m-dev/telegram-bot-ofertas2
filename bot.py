@@ -1,4 +1,6 @@
 import requests
+import cloudscraper
+from bs4 import BeautifulSoup
 
 from telegram.ext import (
     Application,
@@ -11,6 +13,102 @@ import os
 TOKEN = os.getenv("TOKEN")
 
 CANAL = "-1003914285353"
+
+
+def pegar_titulo(url):
+
+    try:
+
+        headers = {
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        scraper = cloudscraper.create_scraper()
+
+        resposta = scraper.get(
+            url,
+            headers=headers,
+            timeout=15
+        )
+
+        soup = BeautifulSoup(
+            resposta.text,
+            "html.parser"
+        )
+
+        titulo = ""
+
+        # AMAZON
+        if "amazon" in url:
+
+            produto = soup.find(id="productTitle")
+
+            if produto:
+                titulo = produto.get_text().strip()
+
+        # MERCADO LIVRE
+        elif "mercadolivre" in url or "meli" in url:
+
+            produto = soup.find("h1")
+
+            if produto:
+                titulo = produto.get_text().strip()
+
+        # SHOPEE
+        elif "shopee" in url:
+
+            meta = soup.find(
+                "meta",
+                property="og:title"
+            )
+
+            if meta:
+                titulo = meta.get("content")
+
+        # SHEIN
+        elif "shein" in url:
+
+            meta = soup.find(
+                "meta",
+                property="og:title"
+            )
+
+            if meta:
+                titulo = meta.get("content")
+
+        # OUTROS
+        else:
+
+            if soup.title:
+                titulo = soup.title.text.strip()
+
+        titulo = titulo.replace(
+            "| Amazon.com.br",
+            ""
+        )
+
+        titulo = titulo.replace(
+            "| Shopee Brasil",
+            ""
+        )
+
+        titulo = titulo.replace(
+            "| SHEIN Brasil",
+            ""
+        )
+
+        titulo = titulo.strip()
+
+        if titulo == "":
+            titulo = "Oferta imperdível"
+
+        return titulo
+
+    except Exception as e:
+
+        print(e)
+
+        return "Oferta imperdível"
 
 
 async def responder(update, context):
@@ -57,14 +155,17 @@ async def responder(update, context):
             allow_redirects=True
         ).url.split("?")[0]
 
-        # MENSAGEM
+        # PEGA NOME REAL DO PRODUTO
+        titulo = pegar_titulo(link)
+
+        # MONTA MENSAGEM
         mensagem = f"""
-🔥 OFERTA IMPERDÍVEL
+🛍 {titulo}
 
 {preco}
 """
 
-        # MOSTRA CUPOM SOMENTE SE EXISTIR
+        # CUPOM OPCIONAL
         if cupom != "":
             mensagem += f"\n🎟 CUPOM: {cupom}\n"
 
@@ -92,6 +193,7 @@ async def responder(update, context):
             )
 
     except Exception as e:
+
         print(e)
 
 
