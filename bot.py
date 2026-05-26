@@ -64,29 +64,7 @@ def pegar_titulo(url):
 
                 titulo = html2[inicio2:fim2].strip()
 
-        # SHOPEE / SHEIN / MERCADO LIVRE
-        if titulo == "":
-
-            if 'property="og:title"' in html:
-
-                inicio = html.find(
-                    'property="og:title"'
-                )
-
-                html2 = html[inicio:]
-
-                inicio2 = html2.find(
-                    'content="'
-                ) + 9
-
-                fim2 = html2.find(
-                    '"',
-                    inicio2
-                )
-
-                titulo = html2[inicio2:fim2].strip()
-
-        # FALLBACK
+        # OUTRAS LOJAS
         if titulo == "":
 
             soup = BeautifulSoup(
@@ -94,10 +72,29 @@ def pegar_titulo(url):
                 "html.parser"
             )
 
-            if soup.title:
+            # og:title
+            meta = soup.find(
+                "meta",
+                property="og:title"
+            )
+
+            if meta:
+                titulo = meta.get("content")
+
+            # h1 fallback
+            if titulo == "":
+
+                h1 = soup.find("h1")
+
+                if h1:
+                    titulo = h1.get_text().strip()
+
+            # title fallback
+            if titulo == "" and soup.title:
+
                 titulo = soup.title.text.strip()
 
-        # REMOVE TEXTOS CHATOS
+        # LIMPEZA
         remover = [
             "| Amazon.com.br",
             "| Shopee Brasil",
@@ -146,7 +143,6 @@ async def responder(update, context):
 
             foto = None
 
-        # VERIFICA TEXTO
         if len(texto) == 0:
             return
 
@@ -168,18 +164,24 @@ async def responder(update, context):
         if "http" not in link:
             return
 
-        # LIMPA LINK
-        link = requests.get(
-            link,
-            headers={
-                "User-Agent": "Mozilla/5.0"
-            },
-            allow_redirects=True,
-            timeout=20
-        ).url.split("?")[0]
+        # PEGA LINK FINAL
+        try:
+
+            link_final = requests.get(
+                link,
+                headers={
+                    "User-Agent": "Mozilla/5.0"
+                },
+                allow_redirects=True,
+                timeout=20
+            ).url
+
+        except:
+
+            link_final = link
 
         # PEGA NOME REAL
-        titulo = pegar_titulo(link)
+        titulo = pegar_titulo(link_final)
 
         # MONTA MENSAGEM
         mensagem = f"""
@@ -198,7 +200,7 @@ async def responder(update, context):
 
         mensagem += f"""
 
-🔗 {link}
+🔗 {link_final}
 """
 
         # ENVIA COM FOTO
