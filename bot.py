@@ -1,4 +1,3 @@
-from urllib.parse import quote
 import random
 import requests
 import cloudscraper
@@ -19,7 +18,7 @@ import os
 
 TOKEN = os.getenv("TOKEN")
 
-CANAL = "-1003914285353"
+CANAL = "-100SEU_CANAL"
 
 
 def pegar_titulo(url):
@@ -100,31 +99,80 @@ def pegar_titulo(url):
         return "Oferta imperdível"
 
 
+def pegar_imagem(url):
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        scraper = cloudscraper.create_scraper()
+
+        resposta = scraper.get(
+            url,
+            headers=headers,
+            timeout=10
+        )
+
+        soup = BeautifulSoup(
+            resposta.text,
+            "html.parser"
+        )
+
+        imagem = None
+
+        # AMAZON
+        if "amazon" in url:
+
+            img = soup.find(id="landingImage")
+
+            if img:
+                imagem = img.get("src")
+
+        # MERCADO LIVRE
+        elif "mercadolivre" in url:
+
+            img = soup.find("img")
+
+            if img:
+                imagem = img.get("src")
+
+        # SHOPEE
+        elif "shopee" in url:
+
+            img = soup.find("img")
+
+            if img:
+                imagem = img.get("src")
+
+        # SHEIN
+        elif "shein" in url:
+
+            img = soup.find("img")
+
+            if img:
+                imagem = img.get("src")
+
+        return imagem
+
+    except:
+        return None
+
+
 async def responder(update, context):
     try:
-        texto = update.message.text
+        link = update.message.text
 
-        if "http" not in texto:
+        if "http" not in link:
+            return
 
-            busca = quote(texto)
+        link = requests.get(
+            link,
+            headers={"User-Agent": "Mozilla/5.0"}
+        ).url.split("?")[0]
 
-            link = f"https://www.amazon.com.br/s?k={busca}"
+        titulo = pegar_titulo(link)
 
-            loja = "📦 BUSCA AMAZON"
-
-            titulo = texto.title()
-
-        else:
-
-            link = requests.get(
-                texto,
-                headers={"User-Agent": "Mozilla/5.0"}
-            ).url.split("?")[0]
-
-            titulo = pegar_titulo(link)
-             
-
-        
+        imagem = pegar_imagem(link)
 
         if "shopee" in link:
             loja = "🛍 OFERTA SHOPEE"
@@ -181,13 +229,25 @@ async def responder(update, context):
 
         reply_markup = InlineKeyboardMarkup(teclado)
 
-        await context.bot.send_message(
-            chat_id=CANAL,
-            text=mensagem,
-            parse_mode="HTML",
-            disable_web_page_preview=False,
-            reply_markup=reply_markup
-        )
+        if imagem:
+
+            await context.bot.send_photo(
+                chat_id=CANAL,
+                photo=imagem,
+                caption=mensagem,
+                parse_mode="HTML",
+                reply_markup=reply_markup
+            )
+
+        else:
+
+            await context.bot.send_message(
+                chat_id=CANAL,
+                text=mensagem,
+                parse_mode="HTML",
+                disable_web_page_preview=False,
+                reply_markup=reply_markup
+            )
 
     except Exception as e:
         print(e)
