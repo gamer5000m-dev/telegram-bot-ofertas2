@@ -38,8 +38,17 @@ def pegar_titulo(url):
 
         titulo = ""
 
+        # PEGA og:title
+        meta = soup.find(
+            "meta",
+            property="og:title"
+        )
+
+        if meta:
+            titulo = meta.get("content")
+
         # AMAZON
-        if "amazon" in url:
+        if titulo == "" and "amazon" in url:
 
             produto = soup.find(id="productTitle")
 
@@ -47,58 +56,37 @@ def pegar_titulo(url):
                 titulo = produto.get_text().strip()
 
         # MERCADO LIVRE
-        elif "mercadolivre" in url or "meli" in url:
+        elif titulo == "" and (
+            "mercadolivre" in url or
+            "meli" in url
+        ):
 
             produto = soup.find("h1")
 
             if produto:
                 titulo = produto.get_text().strip()
 
-        # SHOPEE
-        elif "shopee" in url:
-
-            meta = soup.find(
-                "meta",
-                property="og:title"
-            )
-
-            if meta:
-                titulo = meta.get("content")
-
-        # SHEIN
-        elif "shein" in url:
-
-            meta = soup.find(
-                "meta",
-                property="og:title"
-            )
-
-            if meta:
-                titulo = meta.get("content")
-
-        # OUTROS
-        else:
+        # FALLBACK
+        if titulo == "":
 
             if soup.title:
                 titulo = soup.title.text.strip()
 
-        titulo = titulo.replace(
+        # REMOVE TEXTOS CHATOS
+        remover = [
             "| Amazon.com.br",
-            ""
-        )
-
-        titulo = titulo.replace(
             "| Shopee Brasil",
-            ""
-        )
-
-        titulo = titulo.replace(
             "| SHEIN Brasil",
-            ""
-        )
+            "| Mercado Livre",
+            "Mercado Livre Brasil - Onde comprar e vender de Tudo"
+        ]
+
+        for texto in remover:
+            titulo = titulo.replace(texto, "")
 
         titulo = titulo.strip()
 
+        # FALLBACK FINAL
         if titulo == "":
             titulo = "Oferta imperdível"
 
@@ -129,11 +117,15 @@ async def responder(update, context):
 
             foto = None
 
+        # VERIFICA TEXTO
+        if len(texto) == 0:
+            return
+
         link = texto[0]
 
+        # PREÇO
         preco = "💰 Confira a oferta"
 
-        # PREÇO
         if len(texto) >= 2:
             preco = f"💰 R$ {texto[1]}"
 
@@ -143,6 +135,7 @@ async def responder(update, context):
         if len(texto) >= 3:
             cupom = texto[2]
 
+        # VALIDA LINK
         if "http" not in link:
             return
 
@@ -152,10 +145,11 @@ async def responder(update, context):
             headers={
                 "User-Agent": "Mozilla/5.0"
             },
-            allow_redirects=True
+            allow_redirects=True,
+            timeout=15
         ).url.split("?")[0]
 
-        # PEGA NOME REAL DO PRODUTO
+        # PEGA TÍTULO REAL
         titulo = pegar_titulo(link)
 
         # MONTA MENSAGEM
