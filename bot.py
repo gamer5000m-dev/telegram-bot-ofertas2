@@ -18,7 +18,7 @@ import os
 
 TOKEN = os.getenv("TOKEN")
 
-CANAL = "-100SEU_CANAL"
+CANAL = "-1003914285353"
 
 
 def pegar_titulo(url):
