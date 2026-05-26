@@ -22,14 +22,10 @@ async def responder(update, context):
 
             texto = update.message.caption.splitlines()
 
-            foto = update.message.photo[-1].file_id
-
         # SOMENTE TEXTO
         else:
 
             texto = update.message.text.splitlines()
-
-            foto = None
 
         link = texto[0]
 
@@ -48,7 +44,7 @@ async def responder(update, context):
         if "http" not in link:
             return
 
-        # REMOVE PARÂMETROS GIGANTES
+        # LIMPA LINKS GIGANTES
         link = requests.get(
             link,
             headers={
@@ -64,27 +60,15 @@ async def responder(update, context):
 
 🎟 CUPOM: {cupom}
 
-🔗 LINK DA OFERTA:
-{link}
+🔗 {link}
 """
 
-        # ENVIA FOTO
-        if foto:
-
-            await context.bot.send_photo(
-                chat_id=CANAL,
-                photo=foto,
-                caption=mensagem
-            )
-
-        # ENVIA TEXTO
-        else:
-
-            await context.bot.send_message(
-                chat_id=CANAL,
-                text=mensagem,
-                disable_web_page_preview=False
-            )
+        # ENVIA MENSAGEM COM PREVIEW AUTOMÁTICO
+        await context.bot.send_message(
+            chat_id=CANAL,
+            text=mensagem,
+            disable_web_page_preview=False
+        )
 
     except Exception as e:
         print(e)
