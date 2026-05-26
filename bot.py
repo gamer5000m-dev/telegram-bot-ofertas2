@@ -56,17 +56,15 @@ def pegar_titulo(url):
         elif "shopee" in url:
             if soup.title:
                 titulo = soup.title.text.strip()
-
                 titulo = titulo.replace("| Shopee Brasil", "")
 
         # SHEIN
         elif "shein" in url:
             if soup.title:
                 titulo = soup.title.text.strip()
-
                 titulo = titulo.replace("| SHEIN Brasil", "")
 
-        # PADRÃO
+        # OUTROS
         else:
             if soup.title:
                 titulo = soup.title.text.strip()
