@@ -73,7 +73,22 @@ def pegar_titulo(url):
                 titulo = soup.title.text.strip()
 
         if titulo == "":
-            titulo = "Oferta imperdível"
+
+            if "amazon" in url:
+                titulo = "Promoção Amazon"
+
+            elif "mercadolivre" in url:
+                titulo = "Oferta Mercado Livre"
+
+            elif "shopee" in url:
+                titulo = "Oferta Shopee"
+
+            elif "shein" in url:
+                titulo = "Oferta SHEIN"
+
+            else:
+                titulo = "Oferta imperdível"
+            
 
         return titulo[:80]
 
