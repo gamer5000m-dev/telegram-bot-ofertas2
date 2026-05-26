@@ -1,4 +1,5 @@
 import requests
+from bs4 import BeautifulSoup
 
 from telegram import (
     InlineKeyboardButton,
@@ -15,7 +16,40 @@ import os
 
 TOKEN = os.getenv("TOKEN")
 
-CANAL = "-1003914285353"
+CANAL = ""
+
+
+def pegar_titulo(url):
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        resposta = requests.get(
+            url,
+            headers=headers,
+            timeout=10
+        )
+
+        soup = BeautifulSoup(
+            resposta.text,
+            "html.parser"
+        )
+
+        if soup.title:
+            titulo = soup.title.text.strip()
+
+            titulo = titulo.replace("| Amazon.com.br", "")
+            titulo = titulo.replace("- Mercado Livre", "")
+            titulo = titulo.replace("| Shopee Brasil", "")
+            titulo = titulo.replace("| SHEIN Brasil", "")
+
+            return titulo[:80]
+
+        return "Oferta imperdível"
+
+    except:
+        return "Oferta imperdível"
 
 
 async def responder(update, context):
@@ -25,9 +59,11 @@ async def responder(update, context):
         return
 
     link = requests.get(
-    link,
-    headers={"User-Agent": "Mozilla/5.0"}
-).url.split("?")[0]
+        link,
+        headers={"User-Agent": "Mozilla/5.0"}
+    ).url.split("?")[0]
+
+    titulo = pegar_titulo(link)
 
     if "shopee" in link:
         loja = "🛍 OFERTA SHOPEE"
@@ -49,7 +85,7 @@ async def responder(update, context):
 
 {loja}
 
-🔥 Promoção disponível agora
+🛍 {titulo}
 
 👇 Clique no botão abaixo
 
