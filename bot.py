@@ -9,27 +9,22 @@ api_hash = os.getenv("API_HASH")
 # SEU CANAL
 canal_destino = "-1003914285353"
 
-# CANAIS QUE VAI MONITORAR
+# CANAL MONITORADO
 canais_monitorados = [
     "canaldeofertasecupons"
 ]
 
 client = TelegramClient(
-    "bot",
+    "session",
     api_id,
     api_hash
 )
 
-@client.on(
-    events.NewMessage(
-        chats=canais_monitorados
-    )
-)
+@client.on(events.NewMessage(chats=canais_monitorados))
 async def handler(event):
 
     texto = event.raw_text
 
-    # PEGA LINKS
     links = re.findall(
         r'https?://\S+',
         texto
@@ -39,7 +34,7 @@ async def handler(event):
     if not links:
         return
 
-    # REPOSTA
+    # ENVIA NO SEU CANAL
     await client.send_message(
         canal_destino,
         texto,
