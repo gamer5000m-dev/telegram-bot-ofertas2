@@ -77,6 +77,36 @@ def pegar_titulo(url):
     except:
         return "Oferta imperdível"
 
+
+async def responder(update, context):
+    try:
+        link = update.message.text
+
+        if "http" not in link:
+            return
+
+        link = requests.get(
+            link,
+            headers={"User-Agent": "Mozilla/5.0"}
+        ).url.split("?")[0]
+
+        titulo = pegar_titulo(link)
+
+        if "shopee" in link:
+            loja = "🛍 OFERTA SHOPEE"
+
+        elif "amazon" in link:
+            loja = "📦 OFERTA AMAZON"
+
+        elif "mercadolivre" in link or "meli" in link:
+            loja = "🛒 OFERTA MERCADO LIVRE"
+
+        elif "shein" in link:
+            loja = "👗 OFERTA SHEIN"
+
+        else:
+            loja = "🔥 SUPER OFERTA"
+
         mensagem = f"""
 ━━━━━━━━━━━━━━━
 
