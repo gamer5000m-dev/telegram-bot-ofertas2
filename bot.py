@@ -143,6 +143,8 @@ async def responder(update, context):
 
 🛍 {titulo}
 
+{frase}
+
 👇 Clique no botão abaixo
 
 ━━━━━━━━━━━━━━━
