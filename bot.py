@@ -99,6 +99,67 @@ def pegar_titulo(url):
         return "Oferta imperdível"
 
 
+def pegar_preco(url):
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        scraper = cloudscraper.create_scraper()
+
+        resposta = scraper.get(
+            url,
+            headers=headers,
+            timeout=10
+        )
+
+        soup = BeautifulSoup(
+            resposta.text,
+            "html.parser"
+        )
+
+        preco = ""
+
+        # AMAZON
+        if "amazon" in url:
+
+            valor = soup.find(
+                "span",
+                class_="a-price-whole"
+            )
+
+            centavos = soup.find(
+                "span",
+                class_="a-price-fraction"
+            )
+
+            if valor:
+
+                preco = valor.get_text().strip()
+
+                if centavos:
+                    preco += "," + centavos.get_text().strip()
+
+        # MERCADO LIVRE
+        elif "mercadolivre" in url:
+
+            valor = soup.find(
+                "span",
+                class_="andes-money-amount__fraction"
+            )
+
+            if valor:
+                preco = valor.get_text().strip()
+
+        if preco != "":
+            return f"💰 R$ {preco}"
+
+        return "💥 Oferta especial"
+
+    except:
+        return "💥 Oferta especial"
+
+
 def pegar_imagem(url):
     try:
         headers = {
@@ -172,6 +233,8 @@ async def responder(update, context):
 
         titulo = pegar_titulo(link)
 
+        preco = pegar_preco(link)
+
         imagem = pegar_imagem(link)
 
         if "shopee" in link:
@@ -206,6 +269,8 @@ async def responder(update, context):
 {loja}
 
 🛍 {titulo}
+
+{preco}
 
 {frase}
 
