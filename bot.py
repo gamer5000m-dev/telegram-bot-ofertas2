@@ -1,3 +1,4 @@
+from urllib.parse import quote
 import random
 import requests
 import cloudscraper
@@ -98,17 +99,29 @@ def pegar_titulo(url):
 
 async def responder(update, context):
     try:
-        link = update.message.text
+        texto = update.message.text
 
-        if "http" not in link:
-            return
+        if "http" not in texto:
 
-        link = requests.get(
-            link,
-            headers={"User-Agent": "Mozilla/5.0"}
-        ).url.split("?")[0]
+            busca = quote(texto)
 
-        titulo = pegar_titulo(link)
+            link = f"https://www.amazon.com.br/s?k={busca}"
+
+            loja = "📦 BUSCA AMAZON"
+
+            titulo = texto.title()
+
+        else:
+
+            link = requests.get(
+                texto,
+                headers={"User-Agent": "Mozilla/5.0"}
+            ).url.split("?")[0]
+
+            titulo = pegar_titulo(link)
+             
+
+        
 
         if "shopee" in link:
             loja = "🛍 OFERTA SHOPEE"
