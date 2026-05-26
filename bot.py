@@ -113,43 +113,46 @@ def pegar_preco(url):
             timeout=10
         )
 
-        soup = BeautifulSoup(
-            resposta.text,
-            "html.parser"
-        )
+        html = resposta.text
 
         preco = ""
 
         # AMAZON
         if "amazon" in url:
 
-            valor = soup.find(
-                "span",
-                class_="a-price-whole"
-            )
+            if 'a-price-whole' in html:
 
-            centavos = soup.find(
-                "span",
-                class_="a-price-fraction"
-            )
+                inicio = html.find('a-price-whole">') + 16
+                fim = html.find('<', inicio)
 
-            if valor:
+                valor = html[inicio:fim]
 
-                preco = valor.get_text().strip()
+                preco = valor
 
-                if centavos:
-                    preco += "," + centavos.get_text().strip()
+                if 'a-price-fraction' in html:
+
+                    inicio2 = html.find('a-price-fraction">') + 19
+                    fim2 = html.find('<', inicio2)
+
+                    centavos = html[inicio2:fim2]
+
+                    preco += "," + centavos
 
         # MERCADO LIVRE
         elif "mercadolivre" in url:
 
-            valor = soup.find(
-                "span",
-                class_="andes-money-amount__fraction"
-            )
+            if 'andes-money-amount__fraction' in html:
 
-            if valor:
-                preco = valor.get_text().strip()
+                inicio = html.find(
+                    'andes-money-amount__fraction'
+                )
+
+                html2 = html[inicio:]
+
+                inicio2 = html2.find(">") + 1
+                fim2 = html2.find("<", inicio2)
+
+                preco = html2[inicio2:fim2]
 
         if preco != "":
             return f"💰 R$ {preco}"
