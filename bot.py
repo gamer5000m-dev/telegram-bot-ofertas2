@@ -20,54 +20,79 @@ def pegar_titulo(url):
     try:
 
         headers = {
-            "User-Agent": "Mozilla/5.0"
+            "User-Agent": (
+                "Mozilla/5.0 "
+                "(Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 "
+                "(KHTML, like Gecko) "
+                "Chrome/122.0 Safari/537.36"
+            ),
+            "Accept-Language": "pt-BR,pt;q=0.9"
         }
 
-        scraper = cloudscraper.create_scraper()
+        scraper = cloudscraper.create_scraper(
+            browser={
+                "browser": "chrome",
+                "platform": "windows",
+                "mobile": False
+            }
+        )
 
         resposta = scraper.get(
             url,
             headers=headers,
-            timeout=15
+            timeout=20
         )
 
-        soup = BeautifulSoup(
-            resposta.text,
-            "html.parser"
-        )
+        html = resposta.text
 
         titulo = ""
 
-        # PEGA og:title
-        meta = soup.find(
-            "meta",
-            property="og:title"
-        )
-
-        if meta:
-            titulo = meta.get("content")
-
         # AMAZON
-        if titulo == "" and "amazon" in url:
+        if "amazon" in url:
 
-            produto = soup.find(id="productTitle")
+            if 'id="productTitle"' in html:
 
-            if produto:
-                titulo = produto.get_text().strip()
+                inicio = html.find(
+                    'id="productTitle"'
+                )
 
-        # MERCADO LIVRE
-        elif titulo == "" and (
-            "mercadolivre" in url or
-            "meli" in url
-        ):
+                html2 = html[inicio:]
 
-            produto = soup.find("h1")
+                inicio2 = html2.find(">") + 1
+                fim2 = html2.find("<", inicio2)
 
-            if produto:
-                titulo = produto.get_text().strip()
+                titulo = html2[inicio2:fim2].strip()
+
+        # SHOPEE / SHEIN / MERCADO LIVRE
+        if titulo == "":
+
+            if 'property="og:title"' in html:
+
+                inicio = html.find(
+                    'property="og:title"'
+                )
+
+                html2 = html[inicio:]
+
+                inicio2 = html2.find(
+                    'content="'
+                ) + 9
+
+                fim2 = html2.find(
+                    '"',
+                    inicio2
+                )
+
+                titulo = html2[inicio2:fim2].strip()
 
         # FALLBACK
         if titulo == "":
+
+            soup = BeautifulSoup(
+                html,
+                "html.parser"
+            )
 
             if soup.title:
                 titulo = soup.title.text.strip()
@@ -82,7 +107,11 @@ def pegar_titulo(url):
         ]
 
         for texto in remover:
-            titulo = titulo.replace(texto, "")
+
+            titulo = titulo.replace(
+                texto,
+                ""
+            )
 
         titulo = titulo.strip()
 
@@ -146,10 +175,10 @@ async def responder(update, context):
                 "User-Agent": "Mozilla/5.0"
             },
             allow_redirects=True,
-            timeout=15
+            timeout=20
         ).url.split("?")[0]
 
-        # PEGA TÍTULO REAL
+        # PEGA NOME REAL
         titulo = pegar_titulo(link)
 
         # MONTA MENSAGEM
@@ -161,7 +190,11 @@ async def responder(update, context):
 
         # CUPOM OPCIONAL
         if cupom != "":
-            mensagem += f"\n🎟 CUPOM: {cupom}\n"
+
+            mensagem += f"""
+
+🎟 CUPOM: {cupom}
+"""
 
         mensagem += f"""
 
