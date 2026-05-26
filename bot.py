@@ -46,6 +46,9 @@ async def handler(event):
 
 print("MONITORANDO...")
 
-client.start(phone="+5561994348181")
+client.start(
+    phone="+5561994348181",
+    code_callback=lambda: "88476"
+)
 
 client.run_until_disconnected()
