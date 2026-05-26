@@ -1,4 +1,5 @@
 import requests
+import cloudscraper
 from bs4 import BeautifulSoup
 
 from telegram import (
@@ -25,11 +26,13 @@ def pegar_titulo(url):
             "User-Agent": "Mozilla/5.0"
         }
 
-        resposta = requests.get(
-            url,
-            headers=headers,
-            timeout=10
-        )
+        scraper = cloudscraper.create_scraper()
+
+resposta = scraper.get(
+    url,
+    headers=headers,
+    timeout=10
+)
 
         soup = BeautifulSoup(
             resposta.text,
