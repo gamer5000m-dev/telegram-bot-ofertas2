@@ -28,11 +28,11 @@ def pegar_titulo(url):
 
         scraper = cloudscraper.create_scraper()
 
-resposta = scraper.get(
-    url,
-    headers=headers,
-    timeout=10
-)
+        resposta = scraper.get(
+            url,
+            headers=headers,
+            timeout=10
+        )
 
         soup = BeautifulSoup(
             resposta.text,
