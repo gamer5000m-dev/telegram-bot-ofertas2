@@ -20,6 +20,10 @@ async def responder(update, context):
         # FOTO + LEGENDA
         if update.message.photo:
 
+            if not update.message.caption:
+                print("Sem legenda")
+                return
+
             texto = update.message.caption.splitlines()
 
             foto = update.message.photo[-1].file_id
@@ -27,35 +31,49 @@ async def responder(update, context):
         # SOMENTE TEXTO
         else:
 
+            if not update.message.text:
+                print("Sem texto")
+                return
+
             texto = update.message.text.splitlines()
 
             foto = None
 
-        # VERIFICA TEXTO
+        print(texto)
+
+        # FORMATO MÍNIMO
         if len(texto) < 2:
+
+            print("Formato inválido")
+
             return
 
-        # NOME MANUAL
-        titulo = texto[0]
+        # NOME DO PRODUTO
+        titulo = texto[0].strip()
 
         # LINK
-        link = texto[1]
+        link = texto[1].strip()
+
+        # VALIDA LINK
+        if "http" not in link:
+
+            print("Link inválido")
+
+            return
 
         # PREÇO
         preco = "💰 Confira a oferta"
 
         if len(texto) >= 3:
-            preco = f"💰 R$ {texto[2]}"
+
+            if texto[2].strip() != "":
+                preco = f"💰 R$ {texto[2].strip()}"
 
         # CUPOM OPCIONAL
         cupom = ""
 
         if len(texto) >= 4:
-            cupom = texto[3]
-
-        # VALIDA LINK
-        if "http" not in link:
-            return
+            cupom = texto[3].strip()
 
         # TESTA LINK
         try:
@@ -68,17 +86,18 @@ async def responder(update, context):
                 timeout=10
             )
 
-        except:
-            pass
+        except Exception as erro:
 
-        # MONTA MENSAGEM
+            print(erro)
+
+        # MENSAGEM
         mensagem = f"""
 🛍 {titulo}
 
 {preco}
 """
 
-        # CUPOM OPCIONAL
+        # CUPOM
         if cupom != "":
 
             mensagem += f"""
@@ -86,12 +105,13 @@ async def responder(update, context):
 🎟 CUPOM: {cupom}
 """
 
+        # LINK
         mensagem += f"""
 
 🔗 {link}
 """
 
-        # ENVIA COM FOTO
+        # ENVIA FOTO
         if foto:
 
             await context.bot.send_photo(
@@ -100,7 +120,7 @@ async def responder(update, context):
                 caption=mensagem
             )
 
-        # ENVIA SEM FOTO
+        # ENVIA TEXTO
         else:
 
             await context.bot.send_message(
@@ -109,9 +129,11 @@ async def responder(update, context):
                 disable_web_page_preview=False
             )
 
+        print("Mensagem enviada")
+
     except Exception as e:
 
-        print(e)
+        print("ERRO:", e)
 
 
 app = Application.builder().token(TOKEN).build()
