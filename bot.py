@@ -1,4 +1,3 @@
-import random
 import requests
 import cloudscraper
 from bs4 import BeautifulSoup
@@ -44,6 +43,7 @@ def pegar_titulo(url):
 
         # AMAZON
         if "amazon" in url:
+
             produto = soup.find(id="productTitle")
 
             if produto:
@@ -51,6 +51,7 @@ def pegar_titulo(url):
 
         # MERCADO LIVRE
         elif "mercadolivre" in url:
+
             produto = soup.find("h1")
 
             if produto:
@@ -58,18 +59,21 @@ def pegar_titulo(url):
 
         # SHOPEE
         elif "shopee" in url:
+
             if soup.title:
                 titulo = soup.title.text.strip()
                 titulo = titulo.replace("| Shopee Brasil", "")
 
         # SHEIN
         elif "shein" in url:
+
             if soup.title:
                 titulo = soup.title.text.strip()
                 titulo = titulo.replace("| SHEIN Brasil", "")
 
         # OUTROS
         else:
+
             if soup.title:
                 titulo = soup.title.text.strip()
 
@@ -90,8 +94,8 @@ def pegar_titulo(url):
             else:
                 titulo = "Oferta imperdível"
 
-        if len(titulo) > 55:
-            return titulo[:55] + "..."
+        if len(titulo) > 80:
+            titulo = titulo[:80] + "..."
 
         return titulo
 
@@ -157,10 +161,10 @@ def pegar_preco(url):
         if preco != "":
             return f"💰 R$ {preco}"
 
-        return "💥 Oferta especial"
+        return "💰 Confira a oferta"
 
     except:
-        return "💥 Oferta especial"
+        return "💰 Confira a oferta"
 
 
 def pegar_imagem(url):
@@ -240,50 +244,15 @@ async def responder(update, context):
 
         imagem = pegar_imagem(link)
 
-        if "shopee" in link:
-            loja = "🛍 OFERTA SHOPEE"
-
-        elif "amazon" in link:
-            loja = "📦 OFERTA AMAZON"
-
-        elif "mercadolivre" in link or "meli" in link:
-            loja = "🛒 OFERTA MERCADO LIVRE"
-
-        elif "shein" in link:
-            loja = "👗 OFERTA SHEIN"
-
-        else:
-            loja = "🔥 SUPER OFERTA"
-
-        frases = [
-            "🔥 Oferta relâmpago",
-            "⚠️ Últimas unidades",
-            "💥 Preço promocional",
-            "🚀 Aproveite agora",
-            "🤑 Desconto disponível",
-            "🎯 Oferta do dia"
-        ]
-
-        frase = random.choice(frases)
-
         mensagem = f"""
-━━━━━━━━━━━━━━━
-
-{loja}
-
-🛍 {titulo}
+{titulo}
 
 {preco}
 
-{frase}
+🎟 CUPOM: OFERTA10
 
-👇 Clique no botão abaixo
-
-━━━━━━━━━━━━━━━
-
-#promoção #ofertas #desconto
-
-<a href="{link}">⠀</a>
+🔗 Link da oferta:
+{link}
 """
 
         teclado = [
@@ -303,7 +272,6 @@ async def responder(update, context):
                 chat_id=CANAL,
                 photo=imagem,
                 caption=mensagem,
-                parse_mode="HTML",
                 reply_markup=reply_markup
             )
 
@@ -312,7 +280,6 @@ async def responder(update, context):
             await context.bot.send_message(
                 chat_id=CANAL,
                 text=mensagem,
-                parse_mode="HTML",
                 disable_web_page_preview=False,
                 reply_markup=reply_markup
             )
