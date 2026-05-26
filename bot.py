@@ -91,7 +91,7 @@ def pegar_titulo(url):
             else:
                 titulo = "Oferta imperdível"
 
-        return titulo[:80]
+        return titulo[:55] + "..."
 
     except:
         return "Oferta imperdível"
