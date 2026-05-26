@@ -103,70 +103,6 @@ def pegar_titulo(url):
         return "Oferta imperdível"
 
 
-def pegar_preco(url):
-    try:
-        headers = {
-            "User-Agent": "Mozilla/5.0"
-        }
-
-        scraper = cloudscraper.create_scraper()
-
-        resposta = scraper.get(
-            url,
-            headers=headers,
-            timeout=10
-        )
-
-        html = resposta.text
-
-        preco = ""
-
-        # AMAZON
-        if "amazon" in url:
-
-            if 'a-price-whole' in html:
-
-                inicio = html.find('a-price-whole">') + 16
-                fim = html.find('<', inicio)
-
-                valor = html[inicio:fim]
-
-                preco = valor
-
-                if 'a-price-fraction' in html:
-
-                    inicio2 = html.find('a-price-fraction">') + 19
-                    fim2 = html.find('<', inicio2)
-
-                    centavos = html[inicio2:fim2]
-
-                    preco += "," + centavos
-
-        # MERCADO LIVRE
-        elif "mercadolivre" in url:
-
-            if 'andes-money-amount__fraction' in html:
-
-                inicio = html.find(
-                    'andes-money-amount__fraction'
-                )
-
-                html2 = html[inicio:]
-
-                inicio2 = html2.find(">") + 1
-                fim2 = html2.find("<", inicio2)
-
-                preco = html2[inicio2:fim2]
-
-        if preco != "":
-            return f"💰 R$ {preco}"
-
-        return "💰 Confira a oferta"
-
-    except:
-        return "💰 Confira a oferta"
-
-
 def pegar_imagem(url):
     try:
         headers = {
@@ -199,26 +135,26 @@ def pegar_imagem(url):
         # MERCADO LIVRE
         elif "mercadolivre" in url:
 
-            img = soup.find("img")
+            img = soup.find("meta", property="og:image")
 
             if img:
-                imagem = img.get("src")
+                imagem = img.get("content")
 
         # SHOPEE
         elif "shopee" in url:
 
-            img = soup.find("img")
+            img = soup.find("meta", property="og:image")
 
             if img:
-                imagem = img.get("src")
+                imagem = img.get("content")
 
         # SHEIN
         elif "shein" in url:
 
-            img = soup.find("img")
+            img = soup.find("meta", property="og:image")
 
             if img:
-                imagem = img.get("src")
+                imagem = img.get("content")
 
         return imagem
 
@@ -228,7 +164,19 @@ def pegar_imagem(url):
 
 async def responder(update, context):
     try:
-        link = update.message.text
+
+        texto = update.message.text.splitlines()
+
+        link = texto[0]
+
+        preco = "💰 Confira a oferta"
+        cupom = "OFERTA10"
+
+        if len(texto) >= 2:
+            preco = f"💰 R$ {texto[1]}"
+
+        if len(texto) >= 3:
+            cupom = texto[2]
 
         if "http" not in link:
             return
@@ -240,8 +188,6 @@ async def responder(update, context):
 
         titulo = pegar_titulo(link)
 
-        preco = pegar_preco(link)
-
         imagem = pegar_imagem(link)
 
         mensagem = f"""
@@ -249,7 +195,7 @@ async def responder(update, context):
 
 {preco}
 
-🎟 CUPOM: OFERTA10
+🎟 CUPOM: {cupom}
 
 🔗 Link da oferta:
 {link}
