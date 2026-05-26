@@ -1,6 +1,4 @@
 import requests
-import cloudscraper
-from bs4 import BeautifulSoup
 
 from telegram.ext import (
     Application,
@@ -13,113 +11,6 @@ import os
 TOKEN = os.getenv("TOKEN")
 
 CANAL = "-1003914285353"
-
-
-def pegar_titulo(url):
-
-    try:
-
-        headers = {
-            "User-Agent": (
-                "Mozilla/5.0 "
-                "(Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 "
-                "(KHTML, like Gecko) "
-                "Chrome/122.0 Safari/537.36"
-            ),
-            "Accept-Language": "pt-BR,pt;q=0.9"
-        }
-
-        scraper = cloudscraper.create_scraper(
-            browser={
-                "browser": "chrome",
-                "platform": "windows",
-                "mobile": False
-            }
-        )
-
-        resposta = scraper.get(
-            url,
-            headers=headers,
-            timeout=20
-        )
-
-        html = resposta.text
-
-        titulo = ""
-
-        # AMAZON
-        if "amazon" in url:
-
-            soup = BeautifulSoup(
-                html,
-                "html.parser"
-            )
-
-            produto = soup.find(id="productTitle")
-
-            if produto:
-                titulo = produto.get_text().strip()
-
-        # OUTRAS LOJAS
-        if titulo == "":
-
-            soup = BeautifulSoup(
-                html,
-                "html.parser"
-            )
-
-            # og:title
-            meta = soup.find(
-                "meta",
-                property="og:title"
-            )
-
-            if meta:
-                titulo = meta.get("content")
-
-            # h1 fallback
-            if titulo == "":
-
-                h1 = soup.find("h1")
-
-                if h1:
-                    titulo = h1.get_text().strip()
-
-            # title fallback
-            if titulo == "" and soup.title:
-
-                titulo = soup.title.text.strip()
-
-        # LIMPEZA
-        remover = [
-            "| Amazon.com.br",
-            "| Shopee Brasil",
-            "| SHEIN Brasil",
-            "| Mercado Livre",
-            "Mercado Livre Brasil - Onde comprar e vender de Tudo"
-        ]
-
-        for texto in remover:
-
-            titulo = titulo.replace(
-                texto,
-                ""
-            )
-
-        titulo = titulo.strip()
-
-        # FALLBACK FINAL
-        if titulo == "":
-            titulo = "Oferta imperdível"
-
-        return titulo
-
-    except Exception as e:
-
-        print(e)
-
-        return "Oferta imperdível"
 
 
 async def responder(update, context):
@@ -140,48 +31,47 @@ async def responder(update, context):
 
             foto = None
 
-        if len(texto) == 0:
+        # VERIFICA TEXTO
+        if len(texto) < 2:
             return
 
-        # LINK ORIGINAL (CURTO)
-        link = texto[0]
+        # NOME MANUAL
+        titulo = texto[0]
+
+        # LINK
+        link = texto[1]
 
         # PREÇO
         preco = "💰 Confira a oferta"
 
-        if len(texto) >= 2:
-            preco = f"💰 R$ {texto[1]}"
+        if len(texto) >= 3:
+            preco = f"💰 R$ {texto[2]}"
 
         # CUPOM OPCIONAL
         cupom = ""
 
-        if len(texto) >= 3:
-            cupom = texto[2]
+        if len(texto) >= 4:
+            cupom = texto[3]
 
         # VALIDA LINK
         if "http" not in link:
             return
 
-        # PEGA LINK FINAL APENAS PARA TÍTULO
+        # TESTA LINK
         try:
 
-            link_final = requests.get(
+            requests.get(
                 link,
                 headers={
                     "User-Agent": "Mozilla/5.0"
                 },
-                allow_redirects=True,
-                timeout=20
-            ).url
+                timeout=10
+            )
 
         except:
+            pass
 
-            link_final = link
-
-        # PEGA NOME REAL
-        titulo = pegar_titulo(link_final)
-
-        # MENSAGEM
+        # MONTA MENSAGEM
         mensagem = f"""
 🛍 {titulo}
 
@@ -196,7 +86,6 @@ async def responder(update, context):
 🎟 CUPOM: {cupom}
 """
 
-        # USA LINK CURTO NO POST
         mensagem += f"""
 
 🔗 {link}
