@@ -35,13 +35,13 @@ async def responder(update, context):
 
         preco = "💰 Confira a oferta"
 
-        cupom = "OFERTA10"
-
         # PREÇO
         if len(texto) >= 2:
             preco = f"💰 R$ {texto[1]}"
 
-        # CUPOM
+        # CUPOM OPCIONAL
+        cupom = ""
+
         if len(texto) >= 3:
             cupom = texto[2]
 
@@ -57,12 +57,18 @@ async def responder(update, context):
             allow_redirects=True
         ).url.split("?")[0]
 
+        # MENSAGEM
         mensagem = f"""
 🔥 OFERTA IMPERDÍVEL
 
 {preco}
+"""
 
-🎟 CUPOM: {cupom}
+        # MOSTRA CUPOM SOMENTE SE EXISTIR
+        if cupom != "":
+            mensagem += f"\n🎟 CUPOM: {cupom}\n"
+
+        mensagem += f"""
 
 🔗 {link}
 """
