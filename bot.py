@@ -51,18 +51,15 @@ def pegar_titulo(url):
         # AMAZON
         if "amazon" in url:
 
-            if 'id="productTitle"' in html:
+            soup = BeautifulSoup(
+                html,
+                "html.parser"
+            )
 
-                inicio = html.find(
-                    'id="productTitle"'
-                )
+            produto = soup.find(id="productTitle")
 
-                html2 = html[inicio:]
-
-                inicio2 = html2.find(">") + 1
-                fim2 = html2.find("<", inicio2)
-
-                titulo = html2[inicio2:fim2].strip()
+            if produto:
+                titulo = produto.get_text().strip()
 
         # OUTRAS LOJAS
         if titulo == "":
@@ -146,6 +143,7 @@ async def responder(update, context):
         if len(texto) == 0:
             return
 
+        # LINK ORIGINAL (CURTO)
         link = texto[0]
 
         # PREÇO
@@ -164,7 +162,7 @@ async def responder(update, context):
         if "http" not in link:
             return
 
-        # PEGA LINK FINAL
+        # PEGA LINK FINAL APENAS PARA TÍTULO
         try:
 
             link_final = requests.get(
@@ -183,7 +181,7 @@ async def responder(update, context):
         # PEGA NOME REAL
         titulo = pegar_titulo(link_final)
 
-        # MONTA MENSAGEM
+        # MENSAGEM
         mensagem = f"""
 🛍 {titulo}
 
@@ -198,9 +196,10 @@ async def responder(update, context):
 🎟 CUPOM: {cupom}
 """
 
+        # USA LINK CURTO NO POST
         mensagem += f"""
 
-🔗 {link_final}
+🔗 {link}
 """
 
         # ENVIA COM FOTO
