@@ -91,7 +91,10 @@ def pegar_titulo(url):
             else:
                 titulo = "Oferta imperdível"
 
-        return titulo[:55] + "..."
+        if len(titulo) > 55:
+            return titulo[:55] + "..."
+
+        return titulo
 
     except:
         return "Oferta imperdível"
