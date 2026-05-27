@@ -32,17 +32,33 @@ async def handler(event):
 
     try:
 
-        # IGNORA MENSAGEM VAZIA
-        if not event.message:
+        texto = event.raw_text
+
+        if not texto:
             return
 
-        # COPIA A MENSAGEM COMPLETA
-        await client.forward_messages(
-            canal_destino,
-            event.message
-        )
+        # SE TIVER FOTO
+        if event.photo:
 
-        print("Oferta copiada 🔥")
+            caminho = await event.download_media()
+
+            await client.send_file(
+                canal_destino,
+                caminho,
+                caption=texto,
+                link_preview=False
+            )
+
+        else:
+
+            # SÓ TEXTO
+            await client.send_message(
+                canal_destino,
+                texto,
+                link_preview=False
+            )
+
+        print("Oferta enviada 🔥")
 
     except Exception as e:
 
