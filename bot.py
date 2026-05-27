@@ -34,7 +34,8 @@ async def handler(event):
 
     try:
 
-        texto = event.raw_text
+        # TEXTO PURO
+        texto = event.message.message
 
         if not texto:
             return
@@ -120,8 +121,8 @@ async def handler(event):
             await client.send_file(
                 canal_destino,
                 caminho,
-                caption=str(texto),
-                formatting_entities=None,
+                caption=texto,
+                parse_mode=None,
                 link_preview=False
             )
 
@@ -129,8 +130,8 @@ async def handler(event):
 
             await client.send_message(
                 canal_destino,
-                str(texto),
-                formatting_entities=None,
+                texto,
+                parse_mode=None,
                 link_preview=False
             )
 
