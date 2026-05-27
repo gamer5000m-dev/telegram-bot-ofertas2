@@ -6,7 +6,7 @@ api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 
 # SEU CANAL
-canal_destino = "-1003914285353"
+canal_destino = -1003914285353
 
 # ID DO CANAL MONITORADO
 canais_monitorados = [
@@ -21,8 +21,7 @@ client = TelegramClient(
 
 # LOGIN
 client.start(
-    phone="+5561994348181",
-    code_callback=lambda: "82195"
+    phone="+5561994348181"
 )
 
 print("BOT ONLINE 🔥")
