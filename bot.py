@@ -5,7 +5,7 @@ import os
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 
-# SEU CANAL
+# ID DO SEU CANAL
 canal_destino = -1003914285353
 
 # ID DO CANAL MONITORADO
@@ -32,19 +32,17 @@ async def handler(event):
 
     try:
 
-        texto = event.raw_text
-
-        if not texto:
+        # IGNORA MENSAGEM VAZIA
+        if not event.message:
             return
 
-        # ENVIA NO SEU CANAL
-        await client.send_message(
+        # COPIA A MENSAGEM COMPLETA
+        await client.forward_messages(
             canal_destino,
-            texto,
-            link_preview=False
+            event.message
         )
 
-        print("Oferta enviada 🔥")
+        print("Oferta copiada 🔥")
 
     except Exception as e:
 
