@@ -25,43 +25,13 @@ async def handler(event):
 
     texto = event.raw_text
 
-    links = re.findall(
-        r'https?://\S+',
-        texto
-    )
+    print(texto)
 
-    # SEM LINKS
-    if not links:
+    # IGNORA MENSAGEM VAZIA
+    if not texto:
         return
 
-    link = links[0].lower()
-
-    # LOJAS ACEITAS
-    lojas = [
-        "amazon",
-        "shopee",
-        "mercadolivre",
-        "meli",
-        "shein"
-    ]
-
-    # IGNORA LINKS QUE NÃO SÃO LOJAS
-    if not any(loja in link for loja in lojas):
-        return
-
-    # BLOQUEIA CUPONS
-    palavras_bloqueadas = [
-        "cupom",
-        "cupons",
-        "cashback"
-    ]
-
-    texto_lower = texto.lower()
-
-    if any(p in texto_lower for p in palavras_bloqueadas):
-        return
-
-    # ENVIA PRO CANAL
+    # ENVIA TUDO
     await client.send_message(
         canal_destino,
         texto,
