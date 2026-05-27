@@ -34,7 +34,7 @@ async def handler(event):
 
     try:
 
-        # TEXTO PURO
+        # TEXTO LIMPO
         texto = event.message.message
 
         if not texto:
@@ -116,22 +116,31 @@ async def handler(event):
         # SE TIVER FOTO
         if event.photo:
 
-            caminho = await event.download_media()
+            # BAIXA FOTO LIMPA
+            caminho = await event.download_media(
+                file="temp.jpg"
+            )
 
+            # REENVIA FOTO NOVA
             await client.send_file(
                 canal_destino,
-                caminho,
-                caption=texto,
+                file="temp.jpg",
+                caption=str(texto),
+                force_document=False,
+                supports_streaming=False,
                 parse_mode=None,
+                formatting_entities=[],
                 link_preview=False
             )
 
         else:
 
+            # ENVIA TEXTO LIMPO
             await client.send_message(
                 canal_destino,
-                texto,
+                str(texto),
                 parse_mode=None,
+                formatting_entities=[],
                 link_preview=False
             )
 
