@@ -52,66 +52,87 @@ async def handler(event):
 
         # PEGA LINKS
         links = re.findall(
-            r'https?://\S+',
+            r'https?://[^\s]+',
             texto
         )
 
         # MERCADO LIVRE AFILIADO
-links = re.findall(
-    r'https?://[^\s]+',
-    texto
-)
+        for link in links:
 
-for link in links:
+            if (
+                "mercadolivre" in link.lower()
+                or "meli.la" in link.lower()
+            ):
 
-    if (
-        "mercadolivre" in link.lower()
-        or "meli.la" in link.lower()
-    ):
+                try:
 
-        try:
+                    print("LINK ORIGINAL:", link)
 
-            print("LINK ORIGINAL:", link)
+                    # EXPANDE LINK
+                    response = requests.get(
+                        link,
+                        allow_redirects=True,
+                        timeout=10
+                    )
 
-            # EXPANDE LINK
-            response = requests.get(
-                link,
-                allow_redirects=True,
-                timeout=10
+                    link_real = response.url
+
+                    print("LINK REAL:", link_real)
+
+                    # REMOVE AFILIADO ANTIGO
+                    if "&matt_tool=" in link_real:
+                        link_real = link_real.split("&matt_tool=")[0]
+
+                    if "?matt_tool=" in link_real:
+                        link_real = link_real.split("?matt_tool=")[0]
+
+                    # ADICIONA SEU AFILIADO
+                    if "?" in link_real:
+
+                        novo_link = (
+                            link_real +
+                            "&matt_tool=73653354"
+                        )
+
+                    else:
+
+                        novo_link = (
+                            link_real +
+                            "?matt_tool=73653354"
+                        )
+
+                    print("NOVO LINK:", novo_link)
+
+                    texto = texto.replace(
+                        link,
+                        novo_link
+                    )
+
+                except Exception as e:
+
+                    print("ERRO ML:", e)
+
+        # SE TIVER FOTO
+        if event.photo:
+
+            caminho = await event.download_media()
+
+            await client.send_file(
+                canal_destino,
+                caminho,
+                caption=texto,
+                link_preview=False
             )
 
-            link_real = response.url
+        else:
 
-            print("LINK REAL:", link_real)
-
-            # REMOVE PARAMETROS ANTIGOS
-            link_real = link_real.split("&matt_tool=")[0]
-
-            # ADICIONA SEU AFILIADO
-            if "?" in link_real:
-
-                novo_link = (
-                    link_real +
-                    "&matt_tool=73653354"
-                )
-
-            else:
-
-                novo_link = (
-                    link_real +
-                    "?matt_tool=73653354"
-                )
-
-            print("NOVO LINK:", novo_link)
-
-            texto = texto.replace(
-                link,
-                novo_link
+            await client.send_message(
+                canal_destino,
+                texto,
+                link_preview=False
             )
 
-        except Exception as e:
-
-            print("ERRO ML:", e)
+        print("Oferta enviada 🔥")
 
     except Exception as e:
 
