@@ -30,7 +30,7 @@ async def handler(event):
         texto
     )
 
-    # IGNORA SEM LINK
+    # SEM LINKS
     if not links:
         return
 
@@ -43,26 +43,25 @@ async def handler(event):
         "mercadolivre",
         "meli",
         "shein"
-   ]
+    ]
 
-   # IGNORA SE NÃO FOR LOJA
-   if not any(loja in link for loja in lojas):
+    # IGNORA LINKS QUE NÃO SÃO LOJAS
+    if not any(loja in link for loja in lojas):
         return
 
-   # IGNORA CUPONS
-   palavras_bloqueadas = [
-       "cupom",
-       "cupons",
-       "cashback"
-   ]
+    # BLOQUEIA CUPONS
+    palavras_bloqueadas = [
+        "cupom",
+        "cupons",
+        "cashback"
+    ]
 
-   texto_lower = texto.lower()
+    texto_lower = texto.lower()
 
-   if any(p in texto_lower for p in palavras_bloqueadas):
+    if any(p in texto_lower for p in palavras_bloqueadas):
         return
-        
 
-    # ENVIA NO SEU CANAL
+    # ENVIA PRO CANAL
     await client.send_message(
         canal_destino,
         texto,
