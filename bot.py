@@ -48,7 +48,7 @@ print("MONITORANDO...")
 
 client.start(
     phone="+5561994348181",
-    code_callback=lambda: "25863"
+    code_callback=lambda: "82195"
 )
 
 client.run_until_disconnected()
