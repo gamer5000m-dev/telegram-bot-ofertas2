@@ -15,7 +15,7 @@ canais_monitorados = [
 ]
 
 client = TelegramClient(
-    "session",
+    "/data/session",
     api_id,
     api_hash
 )
