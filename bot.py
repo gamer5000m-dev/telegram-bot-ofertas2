@@ -57,73 +57,61 @@ async def handler(event):
         )
 
         # MERCADO LIVRE AFILIADO
-        for link in links:
+links = re.findall(
+    r'https?://[^\s]+',
+    texto
+)
 
-            if (
-                "mercadolivre" in link.lower()
-                or "meli.la" in link.lower()
-            ):
+for link in links:
 
-                try:
+    if (
+        "mercadolivre" in link.lower()
+        or "meli.la" in link.lower()
+    ):
 
-                    # EXPANDE LINK CURTO
-                    response = requests.get(
-                        link,
-                        allow_redirects=True,
-                        timeout=10
-                    )
+        try:
 
-                    link_real = response.url
+            print("LINK ORIGINAL:", link)
 
-                    # JÁ TEM AFILIADO
-                    if "matt_tool=" in link_real:
-                        continue
-
-                    # ADICIONA AFILIADO
-                    if "?" in link_real:
-
-                        novo_link = (
-                            link_real +
-                            "&matt_tool=73653354"
-                        )
-
-                    else:
-
-                        novo_link = (
-                            link_real +
-                            "?matt_tool=73653354"
-                        )
-
-                    texto = texto.replace(
-                        link,
-                        novo_link
-                    )
-
-                except Exception as e:
-
-                    print(e)
-
-        # SE TIVER FOTO
-        if event.photo:
-
-            caminho = await event.download_media()
-
-            await client.send_file(
-                canal_destino,
-                caminho,
-                caption=texto,
-                link_preview=False
+            # EXPANDE LINK
+            response = requests.get(
+                link,
+                allow_redirects=True,
+                timeout=10
             )
 
-        else:
+            link_real = response.url
 
-            await client.send_message(
-                canal_destino,
-                texto,
-                link_preview=False
+            print("LINK REAL:", link_real)
+
+            # REMOVE PARAMETROS ANTIGOS
+            link_real = link_real.split("&matt_tool=")[0]
+
+            # ADICIONA SEU AFILIADO
+            if "?" in link_real:
+
+                novo_link = (
+                    link_real +
+                    "&matt_tool=73653354"
+                )
+
+            else:
+
+                novo_link = (
+                    link_real +
+                    "?matt_tool=73653354"
+                )
+
+            print("NOVO LINK:", novo_link)
+
+            texto = texto.replace(
+                link,
+                novo_link
             )
 
-        print("Oferta enviada 🔥")
+        except Exception as e:
+
+            print("ERRO ML:", e)
 
     except Exception as e:
 
