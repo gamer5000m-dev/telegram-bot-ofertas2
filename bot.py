@@ -10,9 +10,7 @@ api_hash = os.getenv("API_HASH")
 canal_destino = "-1003914285353"
 
 # CANAL MONITORADO
-canais_monitorados = [
-    "canaldeofertasecupons"
-]
+canais_monitorados = None
 
 client = TelegramClient(
     "/data/session",
@@ -20,25 +18,17 @@ client = TelegramClient(
     api_hash
 )
 
-@client.on(events.NewMessage(chats=canais_monitorados))
+@client.on(events.NewMessage)
 async def handler(event):
 
     texto = event.raw_text
 
-    print(texto)
+    print("MENSAGEM:", texto)
 
-    # IGNORA MENSAGEM VAZIA
-    if not texto:
-        return
-
-    # ENVIA TUDO
     await client.send_message(
         canal_destino,
-        texto,
-        link_preview=True
+        "TESTE"
     )
-
-    print("Oferta enviada")
 
 
 print("MONITORANDO...")
