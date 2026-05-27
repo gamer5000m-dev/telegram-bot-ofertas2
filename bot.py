@@ -10,7 +10,7 @@ api_hash = os.getenv("API_HASH")
 # ID DO SEU CANAL
 canal_destino = -1003914285353
 
-# ID DO CANAL MONITORADO
+# ID DOS CANAIS MONITORADOS
 canais_monitorados = [
     -1001353489373
 ]
@@ -34,7 +34,7 @@ async def handler(event):
 
     try:
 
-        # DEBUG COMPLETO
+        # DEBUG
         print(event.message)
 
         # TEXTO
@@ -72,14 +72,33 @@ async def handler(event):
 
                     print("LINK ORIGINAL:", link)
 
-                    # EXPANDE LINK
+                    # FORÇA EXPANSÃO
                     response = requests.get(
                         link,
                         allow_redirects=True,
-                        timeout=10
+                        timeout=10,
+                        headers={
+                            "User-Agent": (
+                                "Mozilla/5.0"
+                            )
+                        }
                     )
 
-                    link_real = response.url
+                    link_real = str(response.url)
+
+                    # TENTA PEGAR REDIRECT REAL
+                    if "meli.la" in link_real:
+
+                        try:
+
+                            link_real = response.history[-1].headers.get(
+                                "location",
+                                link_real
+                            )
+
+                        except:
+
+                            pass
 
                     print("LINK REAL:", link_real)
 
@@ -107,6 +126,7 @@ async def handler(event):
 
                     print("NOVO LINK:", novo_link)
 
+                    # TROCA LINK
                     texto = texto.replace(
                         link,
                         novo_link
@@ -116,13 +136,15 @@ async def handler(event):
 
                     print("ERRO ML:", e)
 
-        # FOTO
+        # SE TIVER FOTO
         if event.photo:
 
-            caminho = await event.download_media(
+            # BAIXA FOTO LIMPA
+            await event.download_media(
                 file="temp.jpg"
             )
 
+            # ENVIA FOTO NOVA
             await client.send_file(
                 canal_destino,
                 file="temp.jpg",
@@ -134,6 +156,7 @@ async def handler(event):
 
         else:
 
+            # ENVIA TEXTO LIMPO
             await client.send_message(
                 canal_destino,
                 str(texto),
