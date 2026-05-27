@@ -41,7 +41,7 @@ async def handler(event):
         await client.send_message(
             canal_destino,
             texto,
-            link_preview=True
+            link_preview=False
         )
 
         print("Oferta enviada 🔥")
