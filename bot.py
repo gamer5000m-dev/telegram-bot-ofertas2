@@ -8,6 +8,11 @@ api_hash = os.getenv("API_HASH")
 # SEU CANAL
 canal_destino = "-1003914285353"
 
+# ID DO CANAL MONITORADO
+canais_monitorados = [
+    -1001353489373
+]
+
 client = TelegramClient(
     "/data/session",
     api_id,
@@ -23,20 +28,24 @@ client.start(
 print("BOT ONLINE 🔥")
 
 
-# DEBUG PARA PEGAR ID DOS CANAIS
-@client.on(events.NewMessage)
-async def debug(event):
+@client.on(events.NewMessage(chats=canais_monitorados))
+async def handler(event):
 
     try:
 
-        print("CHAT ID:", event.chat_id)
-        print("MENSAGEM:", event.raw_text)
+        texto = event.raw_text
 
-        # TESTE
+        if not texto:
+            return
+
+        # ENVIA NO SEU CANAL
         await client.send_message(
             canal_destino,
-            "TESTE FUNCIONANDO 🔥"
+            texto,
+            link_preview=True
         )
+
+        print("Oferta enviada 🔥")
 
     except Exception as e:
 
