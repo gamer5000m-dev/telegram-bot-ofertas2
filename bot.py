@@ -120,7 +120,8 @@ async def handler(event):
             await client.send_file(
                 canal_destino,
                 caminho,
-                caption=texto,
+                caption=str(texto),
+                formatting_entities=None,
                 link_preview=False
             )
 
@@ -128,7 +129,8 @@ async def handler(event):
 
             await client.send_message(
                 canal_destino,
-                texto,
+                str(texto),
+                formatting_entities=None,
                 link_preview=False
             )
 
