@@ -32,7 +32,35 @@ async def handler(event):
 
     # IGNORA SEM LINK
     if not links:
-        return
+    return
+
+link = links[0].lower()
+
+# LOJAS ACEITAS
+lojas = [
+    "amazon",
+    "shopee",
+    "mercadolivre",
+    "meli",
+    "shein"
+]
+
+# IGNORA SE NÃO FOR LOJA
+if not any(loja in link for loja in lojas):
+    return
+
+# IGNORA CUPONS
+palavras_bloqueadas = [
+    "cupom",
+    "cupons",
+    "cashback"
+]
+
+texto_lower = texto.lower()
+
+if any(p in texto_lower for p in palavras_bloqueadas):
+    return
+        
 
     # ENVIA NO SEU CANAL
     await client.send_message(
