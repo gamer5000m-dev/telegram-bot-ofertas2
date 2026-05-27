@@ -32,22 +32,22 @@ async def handler(event):
 
     # IGNORA SEM LINK
     if not links:
-    return
+        return
 
-link = links[0].lower()
+    link = links[0].lower()
 
-# LOJAS ACEITAS
-lojas = [
-    "amazon",
-    "shopee",
-    "mercadolivre",
-    "meli",
-    "shein"
-]
+    # LOJAS ACEITAS
+    lojas = [
+        "amazon",
+        "shopee",
+        "mercadolivre",
+        "meli",
+        "shein"
+   ]
 
-# IGNORA SE NÃO FOR LOJA
-if not any(loja in link for loja in lojas):
-    return
+   # IGNORA SE NÃO FOR LOJA
+   if not any(loja in link for loja in lojas):
+        return
 
 # IGNORA CUPONS
 palavras_bloqueadas = [
