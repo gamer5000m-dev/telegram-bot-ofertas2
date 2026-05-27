@@ -1,5 +1,6 @@
 from telethon import TelegramClient, events
 import os
+import re
 
 # API TELEGRAM
 api_id = int(os.getenv("API_ID"))
@@ -37,7 +38,7 @@ async def handler(event):
         if not texto:
             return
 
-        # REMOVE PROPAGANDA DO CANAL
+        # REMOVE PROPAGANDA
         remover = [
             "eieutil.com/ofertasecupons",
             "@canaldeofertasecupons"
@@ -47,6 +48,41 @@ async def handler(event):
             texto = texto.replace(r, "")
 
         texto = texto.strip()
+
+        # PEGA LINKS
+        links = re.findall(
+            r'https?://\S+',
+            texto
+        )
+
+        # ADICIONA AFILIADO ML
+        for link in links:
+
+            if "mercadolivre" in link.lower() or "meli.la" in link.lower():
+
+                # JÁ TEM AFILIADO
+                if "matt_tool=" in link:
+                    continue
+
+                # ADICIONA SEU AFILIADO
+                if "?" in link:
+
+                    novo_link = (
+                        link +
+                        "&matt_tool=73653354"
+                    )
+
+                else:
+
+                    novo_link = (
+                        link +
+                        "?matt_tool=73653354"
+                    )
+
+                texto = texto.replace(
+                    link,
+                    novo_link
+                )
 
         # SE TIVER FOTO
         if event.photo:
