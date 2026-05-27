@@ -1,6 +1,7 @@
 from telethon import TelegramClient, events
 import os
 import re
+import requests
 
 # API TELEGRAM
 api_id = int(os.getenv("API_ID"))
@@ -55,34 +56,52 @@ async def handler(event):
             texto
         )
 
-        # ADICIONA AFILIADO ML
+        # MERCADO LIVRE AFILIADO
         for link in links:
 
-            if "mercadolivre" in link.lower() or "meli.la" in link.lower():
+            if (
+                "mercadolivre" in link.lower()
+                or "meli.la" in link.lower()
+            ):
 
-                # JÁ TEM AFILIADO
-                if "matt_tool=" in link:
-                    continue
+                try:
 
-                # ADICIONA SEU AFILIADO
-                if "?" in link:
-
-                    novo_link = (
-                        link +
-                        "&matt_tool=73653354"
+                    # EXPANDE LINK CURTO
+                    response = requests.get(
+                        link,
+                        allow_redirects=True,
+                        timeout=10
                     )
 
-                else:
+                    link_real = response.url
 
-                    novo_link = (
-                        link +
-                        "?matt_tool=73653354"
+                    # JÁ TEM AFILIADO
+                    if "matt_tool=" in link_real:
+                        continue
+
+                    # ADICIONA AFILIADO
+                    if "?" in link_real:
+
+                        novo_link = (
+                            link_real +
+                            "&matt_tool=73653354"
+                        )
+
+                    else:
+
+                        novo_link = (
+                            link_real +
+                            "?matt_tool=73653354"
+                        )
+
+                    texto = texto.replace(
+                        link,
+                        novo_link
                     )
 
-                texto = texto.replace(
-                    link,
-                    novo_link
-                )
+                except Exception as e:
+
+                    print(e)
 
         # SE TIVER FOTO
         if event.photo:
