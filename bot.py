@@ -34,8 +34,11 @@ async def handler(event):
 
     try:
 
-        # TEXTO LIMPO
-        texto = event.message.message
+        # DEBUG COMPLETO
+        print(event.message)
+
+        # TEXTO
+        texto = event.raw_text
 
         if not texto:
             return
@@ -113,21 +116,17 @@ async def handler(event):
 
                     print("ERRO ML:", e)
 
-        # SE TIVER FOTO
+        # FOTO
         if event.photo:
 
-            # BAIXA FOTO LIMPA
             caminho = await event.download_media(
                 file="temp.jpg"
             )
 
-            # REENVIA FOTO NOVA
             await client.send_file(
                 canal_destino,
                 file="temp.jpg",
                 caption=str(texto),
-                force_document=False,
-                supports_streaming=False,
                 parse_mode=None,
                 formatting_entities=[],
                 link_preview=False
@@ -135,7 +134,6 @@ async def handler(event):
 
         else:
 
-            # ENVIA TEXTO LIMPO
             await client.send_message(
                 canal_destino,
                 str(texto),
