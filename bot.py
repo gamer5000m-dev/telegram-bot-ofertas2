@@ -37,6 +37,17 @@ async def handler(event):
         if not texto:
             return
 
+        # REMOVE PROPAGANDA DO CANAL
+        remover = [
+            "eieutil.com/ofertasecupons",
+            "@canaldeofertasecupons"
+        ]
+
+        for r in remover:
+            texto = texto.replace(r, "")
+
+        texto = texto.strip()
+
         # SE TIVER FOTO
         if event.photo:
 
@@ -51,7 +62,6 @@ async def handler(event):
 
         else:
 
-            # SÓ TEXTO
             await client.send_message(
                 canal_destino,
                 texto,
