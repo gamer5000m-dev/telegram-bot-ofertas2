@@ -49,7 +49,8 @@ async def gerar_link_afiliado_ml(link_produto):
 
                 print("LINK ORIGINAL:", link_produto)
 
-                link_real = str(response.url)
+                # PEGA LINK FINAL REAL
+                link_real = str(response.real_url)
 
                 print("LINK REAL:", link_real)
 
