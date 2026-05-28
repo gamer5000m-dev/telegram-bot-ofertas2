@@ -1,6 +1,6 @@
 from telethon import TelegramClient, events
 from playwright.async_api import async_playwright
-from playwright_stealth import stealth_async
+from playwright_stealth import stealth
 import os
 import re
 
@@ -48,7 +48,7 @@ async def gerar_link_afiliado_ml(link_produto):
             page = await browser.new_page()
 
             # STEALTH
-            await stealth_async(page)
+            await stealth(page)
 
             await page.goto(
                 "https://www.mercadolivre.com.br/afiliados/linkbuilder",
