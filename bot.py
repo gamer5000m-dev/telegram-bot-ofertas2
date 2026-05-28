@@ -111,7 +111,7 @@ async def gerar_link_afiliado_ml(link_produto):
 
     except Exception as e:
 
-        print("ERRO AFILIADO:", e)
+        print("ERRO AFILIADO ML:", e)
 
         traceback.print_exc()
 
@@ -161,6 +161,8 @@ async def handler(event):
                 or "meli.la" in link.lower()
             ):
 
+                print("LINK ML DETECTADO 🔥")
+
                 novo_link = await gerar_link_afiliado_ml(link)
 
                 print("LINK NOVO:", novo_link)
@@ -170,6 +172,14 @@ async def handler(event):
                     novo_link,
                     texto
                 )
+
+            # SHOPEE
+            elif (
+                "shopee" in link.lower()
+                or "s.shopee.com.br" in link.lower()
+            ):
+
+                print("LINK SHOPEE DETECTADO 🔥")
 
         print("TEXTO FINAL:")
         print(texto)
