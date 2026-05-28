@@ -43,33 +43,18 @@ async def gerar_link_afiliado_ml(link_produto):
                 allow_redirects=True,
                 timeout=20,
                 headers={
-                    "User-Agent": (
-                        "Mozilla/5.0"
-                    )
+                    "User-Agent": "Mozilla/5.0"
                 }
             ) as response:
 
                 print("LINK ORIGINAL:", link_produto)
 
-                # TENTA PEGAR REDIRECT REAL
-                if response.history:
-
-                    ultimo = response.history[-1]
-
-                    link_real = str(
-                        ultimo.headers.get(
-                            "Location",
-                            response.url
-                        )
-                    )
-
-                else:
-
-                    link_real = str(response.url)
+                # PEGA URL FINAL
+                link_real = str(response.url)
 
                 print("LINK REAL:", link_real)
 
-                # ADICIONA AFILIADO
+                # ADICIONA SEU AFILIADO
                 if "?" in link_real:
 
                     novo_link = (
@@ -107,6 +92,9 @@ async def handler(event):
         if not texto:
             return
 
+        print("TEXTO RECEBIDO:")
+        print(texto)
+
         # REMOVE MARCA D'ÁGUA
         texto = re.sub(
             r"📍.*",
@@ -116,12 +104,16 @@ async def handler(event):
 
         # PEGA LINKS
         links = re.findall(
-            r'https?://\S+',
+            r'(https?://[^\s]+)',
             texto
         )
 
+        print("LINKS ENCONTRADOS:", links)
+
         # PROCESSA LINKS
         for link in links:
+
+            print("PROCESSANDO LINK:", link)
 
             # MERCADO LIVRE
             if (
