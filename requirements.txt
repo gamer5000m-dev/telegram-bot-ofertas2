@@ -1,7 +1,2 @@
-python-telegram-bot
-requests
-cloudscraper
-bs4
 telethon
-playwright
-playwright-stealth
+aiohttp
