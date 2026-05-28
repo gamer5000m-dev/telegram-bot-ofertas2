@@ -170,6 +170,37 @@ async def gerar_link_shopee(link_produto):
 
 
 # ==========================================
+# SHEIN
+# ==========================================
+
+async def gerar_link_shein(link_produto):
+
+    try:
+
+        print("===================================")
+        print("INICIANDO PROCESSAMENTO SHEIN 🔥")
+        print("LINK ORIGINAL:", link_produto)
+        print("===================================")
+
+        # POR ENQUANTO
+        # RETORNA O MESMO LINK
+
+        novo_link = link_produto
+
+        print("LINK SHEIN FINAL:", novo_link)
+
+        return novo_link
+
+    except Exception as e:
+
+        print("ERRO SHEIN:", e)
+
+        traceback.print_exc()
+
+        return link_produto
+
+
+# ==========================================
 # EVENTO TELEGRAM
 # ==========================================
 
@@ -271,8 +302,12 @@ async def handler(event):
                 # ==========================================
 
                 elif (
+
                     "shopee" in link.lower()
                     or "s.shopee.com.br" in link.lower()
+                    or "shope.ee" in link.lower()
+                    or "shp.ee" in link.lower()
+
                 ):
 
                     print("LINK SHOPEE DETECTADO 🔥")
@@ -280,6 +315,29 @@ async def handler(event):
                     novo_link = await gerar_link_shopee(link)
 
                     print("LINK NOVO SHOPEE:", novo_link)
+
+                    texto = re.sub(
+                        re.escape(link),
+                        novo_link,
+                        texto
+                    )
+
+                # ==========================================
+                # SHEIN
+                # ==========================================
+
+                elif (
+
+                    "shein" in link.lower()
+                    or "onelink.shein.com" in link.lower()
+
+                ):
+
+                    print("LINK SHEIN DETECTADO 🔥")
+
+                    novo_link = await gerar_link_shein(link)
+
+                    print("LINK NOVO SHEIN:", novo_link)
 
                     texto = re.sub(
                         re.escape(link),
