@@ -123,7 +123,9 @@ async def handler(event):
 
     try:
 
-        print("MENSAGEM RECEBIDA")
+        print("===================================")
+        print("MENSAGEM RECEBIDA 🔥")
+        print("===================================")
 
         # TEXTO / CAPTION
         texto = event.message.message or ""
@@ -132,7 +134,7 @@ async def handler(event):
             print("SEM TEXTO")
             return
 
-        print("TEXTO:")
+        print("TEXTO ORIGINAL:")
         print(texto)
 
         # REMOVE MARCA D'ÁGUA
@@ -142,6 +144,9 @@ async def handler(event):
             texto
         ).strip()
 
+        print("TEXTO LIMPO:")
+        print(texto)
+
         # PEGA LINKS
         links = re.findall(
             r"(https?://[^\s]+)",
@@ -150,42 +155,68 @@ async def handler(event):
 
         print("LINKS ENCONTRADOS:", links)
 
+        # SEM LINKS
+        if not links:
+
+            print("SEM LINKS NA MENSAGEM")
+
         # PROCESSA LINKS
-        for link in links:
+        for i, link in enumerate(links):
 
-            print("PROCESSANDO:", link)
+            try:
 
-            # MERCADO LIVRE
-            if (
-                "mercadolivre" in link.lower()
-                or "meli.la" in link.lower()
-            ):
+                print("===================================")
+                print(f"LINK {i+1}: {link}")
+                print("ANALISANDO LINK...")
+                print("===================================")
 
-                print("LINK ML DETECTADO 🔥")
+                # MERCADO LIVRE
+                if (
+                    "mercadolivre" in link.lower()
+                    or "meli.la" in link.lower()
+                ):
 
-                novo_link = await gerar_link_afiliado_ml(link)
+                    print("LINK ML DETECTADO 🔥")
 
-                print("LINK NOVO:", novo_link)
+                    novo_link = await gerar_link_afiliado_ml(link)
 
-                texto = re.sub(
-                    re.escape(link),
-                    novo_link,
-                    texto
-                )
+                    print("LINK NOVO:", novo_link)
 
-            # SHOPEE
-            elif (
-                "shopee" in link.lower()
-                or "s.shopee.com.br" in link.lower()
-            ):
+                    texto = re.sub(
+                        re.escape(link),
+                        novo_link,
+                        texto
+                    )
 
-                print("LINK SHOPEE DETECTADO 🔥")
+                # SHOPEE
+                elif (
+                    "shopee" in link.lower()
+                    or "s.shopee.com.br" in link.lower()
+                ):
 
+                    print("LINK SHOPEE DETECTADO 🔥")
+
+                else:
+
+                    print("LINK NÃO IDENTIFICADO")
+
+                print("FIM PROCESSAMENTO LINK 🔥")
+
+            except Exception as erro_link:
+
+                print("ERRO NO LINK:", erro_link)
+
+                traceback.print_exc()
+
+        print("===================================")
         print("TEXTO FINAL:")
         print(texto)
+        print("===================================")
 
         # ENVIA FOTO + TEXTO
         if event.photo:
+
+            print("ENVIANDO FOTO 🔥")
 
             arquivo = await event.download_media()
 
@@ -198,13 +229,15 @@ async def handler(event):
 
         else:
 
+            print("ENVIANDO TEXTO 🔥")
+
             await client.send_message(
                 canal_destino,
                 texto,
                 link_preview=True
             )
 
-        print("Oferta enviada 🔥")
+        print("OFERTA ENVIADA 🔥")
 
     except Exception as e:
 
