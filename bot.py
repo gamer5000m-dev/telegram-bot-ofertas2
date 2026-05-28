@@ -2,6 +2,7 @@ from telethon import TelegramClient, events
 import os
 import re
 import aiohttp
+import traceback
 
 # API TELEGRAM
 api_id = int(os.getenv("API_ID"))
@@ -39,13 +40,22 @@ async def gerar_link_afiliado_ml(link_produto):
 
             async with session.get(
                 link_produto,
-                allow_redirects=True
+                allow_redirects=True,
+                timeout=20,
+                headers={
+                    "User-Agent": (
+                        "Mozilla/5.0"
+                    )
+                }
             ) as response:
 
-                link_real = str(response.url)
+                # PEGA URL FINAL REAL
+                link_real = str(response.real_url)
 
+                print("LINK ORIGINAL:", link_produto)
                 print("LINK REAL:", link_real)
 
+                # ADICIONA AFILIADO
                 if "?" in link_real:
 
                     novo_link = (
@@ -67,6 +77,8 @@ async def gerar_link_afiliado_ml(link_produto):
     except Exception as e:
 
         print("ERRO AFILIADO:", e)
+
+        traceback.print_exc()
 
         return link_produto
 
@@ -135,6 +147,8 @@ async def handler(event):
     except Exception as e:
 
         print("ERRO:", e)
+
+        traceback.print_exc()
 
 
 client.run_until_disconnected()
