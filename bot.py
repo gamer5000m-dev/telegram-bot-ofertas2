@@ -90,7 +90,7 @@ async def gerar_link_afiliado_ml(link_produto):
                 if link_real.endswith("&"):
                     link_real = link_real[:-1]
 
-                # ADICIONA SEU AFILIADO
+                # ADICIONA AFILIADO
                 if "?" in link_real:
 
                     novo_link = (
@@ -118,20 +118,40 @@ async def gerar_link_afiliado_ml(link_produto):
         return link_produto
 
 
-@client.on(events.NewMessage(chats=canais_monitorados))
+@client.on(events.NewMessage(
+    chats=canais_monitorados,
+    incoming=True
+))
 async def handler(event):
 
     try:
 
         print("===================================")
         print("MENSAGEM RECEBIDA 🔥")
+        print("ID MSG:", event.id)
         print("===================================")
 
-        # TEXTO / CAPTION
-        texto = event.message.message or ""
+        # TEXTO
+        texto = ""
 
-        if not texto:
-            print("SEM TEXTO")
+        if event.message.message:
+
+            texto = event.message.message
+
+        elif event.message.raw_text:
+
+            texto = event.message.raw_text
+
+        elif event.text:
+
+            texto = event.text
+
+        texto = str(texto).strip()
+
+        # SEM TEXTO E SEM FOTO
+        if not texto and not event.photo:
+
+            print("SEM TEXTO E SEM FOTO")
             return
 
         print("TEXTO ORIGINAL:")
@@ -213,7 +233,7 @@ async def handler(event):
         print(texto)
         print("===================================")
 
-        # ENVIA FOTO + TEXTO
+        # ENVIA FOTO
         if event.photo:
 
             print("ENVIANDO FOTO 🔥")
@@ -227,6 +247,7 @@ async def handler(event):
                 link_preview=False
             )
 
+        # ENVIA TEXTO
         else:
 
             print("ENVIANDO TEXTO 🔥")
