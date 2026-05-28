@@ -53,20 +53,40 @@ async def gerar_link_afiliado_ml(link_produto):
 
                 print("LINK REAL:", link_real)
 
-                # ADICIONA AFILIADO
-                if "?" in link_real:
+                # REMOVE AFILIADOS ANTIGOS
+link_real = re.sub(
+    r'([&?])matt_tool=[^&]+',
+    '',
+    link_real
+)
 
-                    novo_link = (
-                        link_real
-                        + "&matt_tool=73653354"
-                    )
+link_real = re.sub(
+    r'([&?])matt_word=[^&]+',
+    '',
+    link_real
+)
 
-                else:
+# LIMPA ?& BUGADO
+link_real = link_real.replace("?&", "?")
 
-                    novo_link = (
-                        link_real
-                        + "?matt_tool=73653354"
-                    )
+# REMOVE ? NO FINAL
+if link_real.endswith("?"):
+    link_real = link_real[:-1]
+
+# ADICIONA SEU AFILIADO
+if "?" in link_real:
+
+    novo_link = (
+        link_real
+        + "&matt_tool=73653354"
+    )
+
+else:
+
+    novo_link = (
+        link_real
+        + "?matt_tool=73653354"
+    )
 
                 print("NOVO LINK:", novo_link)
 
