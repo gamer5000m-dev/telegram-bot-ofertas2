@@ -30,7 +30,7 @@ client.start(
 print("BOT ONLINE 🔥")
 
 
-# GERADOR LINK AFILIADO ML
+# GERADOR AFILIADO MERCADO LIVRE
 async def gerar_link_afiliado_ml(link_produto):
 
     try:
@@ -48,48 +48,72 @@ async def gerar_link_afiliado_ml(link_produto):
                 timeout=60000
             )
 
-            await page.wait_for_timeout(3000)
+            print("ABRIU PAGINA")
 
-            # CAMPO TEXTAREA
+            await page.wait_for_timeout(5000)
+
+            # PREENCHE LINK
             await page.fill(
                 "textarea",
                 link_produto
             )
 
-            await page.wait_for_timeout(1000)
+            print("LINK PREENCHIDO")
 
-            # BOTÃO GERAR
-            await page.click("button")
+            await page.wait_for_timeout(2000)
 
-            await page.wait_for_timeout(5000)
+            # PROCURA BOTÃO GERAR
+            botoes = await page.locator("button").all()
 
-            # PEGA TODOS INPUTS
-            inputs = await page.locator("input").all()
-
-            novo_link = link_produto
-
-            for i in inputs:
+            for botao in botoes:
 
                 try:
 
-                    valor = await i.input_value()
+                    texto_botao = await botao.inner_text()
+
+                    print("BOTAO:", texto_botao)
 
                     if (
-                        "mercadolivre.com.br/social/" in valor
+                        "Gerar" in texto_botao
+                        or "gerar" in texto_botao
                     ):
 
-                        novo_link = valor
+                        await botao.click()
+
+                        print("CLICOU GERAR")
+
                         break
 
                 except:
                     pass
 
+            await page.wait_for_timeout(7000)
+
+            # PEGA HTML
+            html = await page.content()
+
+            # DEBUG
+            print(html[:5000])
+
+            # PROCURA LINK SOCIAL
+            links_social = re.findall(
+                r'https://www\.mercadolivre\.com\.br/social/\S+',
+                html
+            )
+
+            if links_social:
+
+                novo_link = links_social[0]
+
+                print("LINK GERADO:", novo_link)
+
+                await browser.close()
+
+                return novo_link
+
             await browser.close()
 
-            print("LINK ORIGINAL:", link_produto)
-            print("NOVO LINK:", novo_link)
-
-            return novo_link
+            return link_produto
 
     except Exception as e:
 
