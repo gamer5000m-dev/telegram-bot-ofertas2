@@ -4,6 +4,8 @@ import re
 import aiohttp
 import traceback
 
+from playwright.async_api import async_playwright
+
 # API TELEGRAM
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
@@ -130,23 +132,37 @@ async def gerar_link_shopee(link_produto):
     try:
 
         print("===================================")
-        print("INICIANDO PROCESSAMENTO SHOPEE 🔥")
-        print("LINK ORIGINAL:", link_produto)
+        print("INICIANDO PLAYWRIGHT SHOPEE 🔥")
+        print("LINK:", link_produto)
         print("===================================")
 
-        # POR ENQUANTO
-        # AINDA NÃO GERA AFILIADO
-        # APENAS RETORNA O LINK
+        async with async_playwright() as p:
 
-        novo_link = link_produto
+            browser = await p.chromium.launch(
+                headless=True
+            )
 
-        print("LINK SHOPEE FINAL:", novo_link)
+            page = await browser.new_page()
 
-        return novo_link
+            await page.goto(
+                "https://affiliate.shopee.com.br/",
+                wait_until="domcontentloaded",
+                timeout=60000
+            )
+
+            print("SHOPEE ABERTA 🔥")
+
+            titulo = await page.title()
+
+            print("TITULO PAGINA:", titulo)
+
+            await browser.close()
+
+        return link_produto
 
     except Exception as e:
 
-        print("ERRO SHOPEE:", e)
+        print("ERRO PLAYWRIGHT SHOPEE:", e)
 
         traceback.print_exc()
 
