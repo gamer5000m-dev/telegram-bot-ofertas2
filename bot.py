@@ -1,9 +1,7 @@
-import aiohttp
 from telethon import TelegramClient, events
-from playwright.async_api import async_playwright
-from playwright_stealth import Stealth
 import os
 import re
+import aiohttp
 
 # API TELEGRAM
 api_id = int(os.getenv("API_ID"))
@@ -37,140 +35,34 @@ async def gerar_link_afiliado_ml(link_produto):
 
     try:
 
-        async with async_playwright() as p:
+        async with aiohttp.ClientSession() as session:
 
-            browser = await p.chromium.launch(
-                headless=True,
-                args=[
-                    "--disable-blink-features=AutomationControlled"
-                ]
-            )
+            async with session.get(
+                link_produto,
+                allow_redirects=True
+            ) as response:
 
-            page = await browser.new_page()
+                link_real = str(response.url)
 
-            # STEALTH
-            await Stealth().apply_stealth_async(page)
+                print("LINK REAL:", link_real)
 
-            await page.goto(
-                "https://www.mercadolivre.com.br/afiliados/linkbuilder",
-                timeout=60000
-            )
+                if "?" in link_real:
 
-            print("ABRIU PAGINA")
-
-            await page.wait_for_timeout(7000)
-
-            # PEGA TODOS INPUTS
-            inputs = await page.locator(
-                "input"
-            ).all()
-
-            achou_input = False
-
-            # PROCURA INPUT TYPE TEXT
-            for campo in inputs:
-
-                try:
-
-                    tipo = await campo.get_attribute(
-                        "type"
+                    novo_link = (
+                        link_real
+                        + "&matt_tool=73653354"
                     )
 
-                    print("TIPO INPUT:", tipo)
+                else:
 
-                    if tipo == "text":
+                    novo_link = (
+                        link_real
+                        + "?matt_tool=73653354"
+                    )
 
-                        await campo.fill(
-                            link_produto
-                        )
-
-                        print("LINK PREENCHIDO")
-
-                        achou_input = True
-
-                        break
-
-                except:
-                    pass
-
-            if not achou_input:
-
-                print("NAO ACHOU INPUT")
-
-                html = await page.content()
-
-                print(html[:5000])
-
-                await browser.close()
-
-                return link_produto
-
-            await page.wait_for_timeout(3000)
-
-            # PROCURA BOTÃO
-            botoes = await page.locator(
-                "button"
-            ).all()
-
-            clicou = False
-
-            for botao in botoes:
-
-                try:
-
-                    texto_botao = await botao.inner_text()
-
-                    print("BOTAO:", texto_botao)
-
-                    if (
-                        "Gerar" in texto_botao
-                        or "Criar" in texto_botao
-                        or "generar" in texto_botao.lower()
-                    ):
-
-                        await botao.click()
-
-                        print("CLICOU GERAR")
-
-                        clicou = True
-
-                        break
-
-                except:
-                    pass
-
-            if not clicou:
-
-                print("NAO ACHOU BOTAO")
-
-            await page.wait_for_timeout(8000)
-
-            # PEGA HTML
-            html = await page.content()
-
-            print(html[:5000])
-
-            # PROCURA LINK SOCIAL
-            links_social = re.findall(
-                r'https://www\.mercadolivre\.com\.br/social/\S+',
-                html
-            )
-
-            if links_social:
-
-                novo_link = links_social[0]
-
-                print("LINK GERADO:", novo_link)
-
-                await browser.close()
+                print("NOVO LINK:", novo_link)
 
                 return novo_link
-
-            print("NAO GEROU LINK")
-
-            await browser.close()
-
-            return link_produto
 
     except Exception as e:
 
