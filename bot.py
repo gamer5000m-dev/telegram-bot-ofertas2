@@ -38,9 +38,9 @@ async def gerar_link_afiliado_ml(link_produto):
 
         async with aiohttp.ClientSession() as session:
 
-            async with session.get(
+            async with session.head(
                 link_produto,
-                allow_redirects=True,
+                allow_redirects=False,
                 timeout=20,
                 headers={
                     "User-Agent": (
@@ -49,10 +49,14 @@ async def gerar_link_afiliado_ml(link_produto):
                 }
             ) as response:
 
-                # PEGA URL FINAL REAL
-                link_real = str(response.real_url)
-
                 print("LINK ORIGINAL:", link_produto)
+
+                # PEGA REDIRECT REAL
+                link_real = response.headers.get(
+                    "Location",
+                    link_produto
+                )
+
                 print("LINK REAL:", link_real)
 
                 # ADICIONA AFILIADO
