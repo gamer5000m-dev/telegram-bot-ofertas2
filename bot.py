@@ -52,29 +52,34 @@ async def gerar_link_afiliado_ml(link_produto):
 
             await page.wait_for_timeout(5000)
 
-            # PREENCHE INPUT
-            inputs = await page.locator("input").all()
+            # PEGA TODOS INPUTS
+            inputs = await page.locator(
+                "input"
+            ).all()
 
-for campo in inputs:
+            # PROCURA INPUT TYPE TEXT
+            for campo in inputs:
 
-    try:
+                try:
 
-        tipo = await campo.get_attribute("type")
+                    tipo = await campo.get_attribute(
+                        "type"
+                    )
 
-        print("TIPO INPUT:", tipo)
+                    print("TIPO INPUT:", tipo)
 
-        if tipo == "text":
+                    if tipo == "text":
 
-            await campo.fill(link_produto)
+                        await campo.fill(
+                            link_produto
+                        )
 
-            print("LINK PREENCHIDO")
+                        print("LINK PREENCHIDO")
 
-            break
+                        break
 
-    except:
-        pass
-
-            print("LINK PREENCHIDO")
+                except:
+                    pass
 
             await page.wait_for_timeout(2000)
 
