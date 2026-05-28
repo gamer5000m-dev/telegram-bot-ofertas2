@@ -4,3 +4,4 @@ cloudscraper
 bs4
 telethon
 playwright
+playwright-stealth
