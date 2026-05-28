@@ -49,12 +49,11 @@ async def gerar_link_afiliado_ml(link_produto):
 
                 print("LINK ORIGINAL:", link_produto)
 
-                # PEGA URL FINAL
                 link_real = str(response.url)
 
                 print("LINK REAL:", link_real)
 
-                # ADICIONA SEU AFILIADO
+                # ADICIONA AFILIADO
                 if "?" in link_real:
 
                     novo_link = (
@@ -87,12 +86,16 @@ async def handler(event):
 
     try:
 
-        texto = event.raw_text
+        print("MENSAGEM RECEBIDA")
+
+        # PEGA TEXO/CAPTION
+        texto = event.message.message or ""
 
         if not texto:
+            print("SEM TEXTO")
             return
 
-        print("TEXTO RECEBIDO:")
+        print("TEXTO:")
         print(texto)
 
         # REMOVE MARCA D'ÁGUA
@@ -104,7 +107,7 @@ async def handler(event):
 
         # PEGA LINKS
         links = re.findall(
-            r'(https?://[^\s]+)',
+            r"(https?://[^\s]+)",
             texto
         )
 
@@ -113,7 +116,7 @@ async def handler(event):
         # PROCESSA LINKS
         for link in links:
 
-            print("PROCESSANDO LINK:", link)
+            print("PROCESSANDO:", link)
 
             # MERCADO LIVRE
             if (
@@ -123,14 +126,16 @@ async def handler(event):
 
                 novo_link = await gerar_link_afiliado_ml(link)
 
-                print("LINK ENCONTRADO:", link)
-                print("NOVO LINK:", novo_link)
+                print("LINK NOVO:", novo_link)
 
                 texto = re.sub(
                     re.escape(link),
                     novo_link,
                     texto
                 )
+
+        print("TEXTO FINAL:")
+        print(texto)
 
         # ENVIA FOTO + TEXTO
         if event.photo:
@@ -156,7 +161,7 @@ async def handler(event):
 
     except Exception as e:
 
-        print("ERRO:", e)
+        print("ERRO GERAL:", e)
 
         traceback.print_exc()
 
