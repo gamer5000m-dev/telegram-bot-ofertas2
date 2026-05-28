@@ -30,7 +30,7 @@ client.start(
 print("BOT ONLINE 🔥")
 
 
-# GERADOR AFILIADO MERCADO LIVRE
+# GERAR LINK AFILIADO ML
 async def gerar_link_afiliado_ml(link_produto):
 
     try:
@@ -52,18 +52,19 @@ async def gerar_link_afiliado_ml(link_produto):
 
             await page.wait_for_timeout(5000)
 
-            # PREENCHE LINK
-            await page.fill(
-                "textarea",
-                link_produto
-            )
+            # PREENCHE INPUT
+            await page.locator(
+                "input"
+            ).first.fill(link_produto)
 
             print("LINK PREENCHIDO")
 
             await page.wait_for_timeout(2000)
 
-            # PROCURA BOTÃO GERAR
-            botoes = await page.locator("button").all()
+            # PROCURA BOTÃO
+            botoes = await page.locator(
+                "button"
+            ).all()
 
             for botao in botoes:
 
@@ -75,7 +76,7 @@ async def gerar_link_afiliado_ml(link_produto):
 
                     if (
                         "Gerar" in texto_botao
-                        or "gerar" in texto_botao
+                        or "Criar" in texto_botao
                     ):
 
                         await botao.click()
