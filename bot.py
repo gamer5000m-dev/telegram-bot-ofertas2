@@ -1,5 +1,6 @@
 from telethon import TelegramClient, events
 from playwright.async_api import async_playwright
+from playwright_stealth import stealth_async
 import os
 import re
 
@@ -38,10 +39,16 @@ async def gerar_link_afiliado_ml(link_produto):
         async with async_playwright() as p:
 
             browser = await p.chromium.launch(
-                headless=True
+                headless=True,
+                args=[
+                    "--disable-blink-features=AutomationControlled"
+                ]
             )
 
             page = await browser.new_page()
+
+            # STEALTH
+            await stealth_async(page)
 
             await page.goto(
                 "https://www.mercadolivre.com.br/afiliados/linkbuilder",
@@ -50,12 +57,14 @@ async def gerar_link_afiliado_ml(link_produto):
 
             print("ABRIU PAGINA")
 
-            await page.wait_for_timeout(5000)
+            await page.wait_for_timeout(7000)
 
             # PEGA TODOS INPUTS
             inputs = await page.locator(
                 "input"
             ).all()
+
+            achou_input = False
 
             # PROCURA INPUT TYPE TEXT
             for campo in inputs:
@@ -76,17 +85,33 @@ async def gerar_link_afiliado_ml(link_produto):
 
                         print("LINK PREENCHIDO")
 
+                        achou_input = True
+
                         break
 
                 except:
                     pass
 
-            await page.wait_for_timeout(2000)
+            if not achou_input:
+
+                print("NAO ACHOU INPUT")
+
+                html = await page.content()
+
+                print(html[:5000])
+
+                await browser.close()
+
+                return link_produto
+
+            await page.wait_for_timeout(3000)
 
             # PROCURA BOTÃO
             botoes = await page.locator(
                 "button"
             ).all()
+
+            clicou = False
 
             for botao in botoes:
 
@@ -99,23 +124,29 @@ async def gerar_link_afiliado_ml(link_produto):
                     if (
                         "Gerar" in texto_botao
                         or "Criar" in texto_botao
+                        or "generar" in texto_botao.lower()
                     ):
 
                         await botao.click()
 
                         print("CLICOU GERAR")
 
+                        clicou = True
+
                         break
 
                 except:
                     pass
 
-            await page.wait_for_timeout(7000)
+            if not clicou:
+
+                print("NAO ACHOU BOTAO")
+
+            await page.wait_for_timeout(8000)
 
             # PEGA HTML
             html = await page.content()
 
-            # DEBUG
             print(html[:5000])
 
             # PROCURA LINK SOCIAL
@@ -133,6 +164,8 @@ async def gerar_link_afiliado_ml(link_produto):
                 await browser.close()
 
                 return novo_link
+
+            print("NAO GEROU LINK")
 
             await browser.close()
 
