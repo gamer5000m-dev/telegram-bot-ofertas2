@@ -38,9 +38,9 @@ async def gerar_link_afiliado_ml(link_produto):
 
         async with aiohttp.ClientSession() as session:
 
-            async with session.head(
+            async with session.get(
                 link_produto,
-                allow_redirects=False,
+                allow_redirects=True,
                 timeout=20,
                 headers={
                     "User-Agent": (
@@ -51,11 +51,21 @@ async def gerar_link_afiliado_ml(link_produto):
 
                 print("LINK ORIGINAL:", link_produto)
 
-                # PEGA REDIRECT REAL
-                link_real = response.headers.get(
-                    "Location",
-                    link_produto
-                )
+                # TENTA PEGAR REDIRECT REAL
+                if response.history:
+
+                    ultimo = response.history[-1]
+
+                    link_real = str(
+                        ultimo.headers.get(
+                            "Location",
+                            response.url
+                        )
+                    )
+
+                else:
+
+                    link_real = str(response.url)
 
                 print("LINK REAL:", link_real)
 
@@ -121,9 +131,13 @@ async def handler(event):
 
                 novo_link = await gerar_link_afiliado_ml(link)
 
-                texto = texto.replace(
-                    link,
-                    novo_link
+                print("LINK ENCONTRADO:", link)
+                print("NOVO LINK:", novo_link)
+
+                texto = re.sub(
+                    re.escape(link),
+                    novo_link,
+                    texto
                 )
 
         # ENVIA FOTO + TEXTO
