@@ -54,39 +54,39 @@ async def gerar_link_afiliado_ml(link_produto):
                 print("LINK REAL:", link_real)
 
                 # REMOVE AFILIADOS ANTIGOS
-link_real = re.sub(
-    r'([&?])matt_tool=[^&]+',
-    '',
-    link_real
-)
+                link_real = re.sub(
+                    r'([&?])matt_tool=[^&]+',
+                    '',
+                    link_real
+                )
 
-link_real = re.sub(
-    r'([&?])matt_word=[^&]+',
-    '',
-    link_real
-)
+                link_real = re.sub(
+                    r'([&?])matt_word=[^&]+',
+                    '',
+                    link_real
+                )
 
-# LIMPA ?& BUGADO
-link_real = link_real.replace("?&", "?")
+                # LIMPA ?& BUGADO
+                link_real = link_real.replace("?&", "?")
 
-# REMOVE ? NO FINAL
-if link_real.endswith("?"):
-    link_real = link_real[:-1]
+                # REMOVE ? NO FINAL
+                if link_real.endswith("?"):
+                    link_real = link_real[:-1]
 
-# ADICIONA SEU AFILIADO
-if "?" in link_real:
+                # ADICIONA SEU AFILIADO
+                if "?" in link_real:
 
-    novo_link = (
-        link_real
-        + "&matt_tool=73653354"
-    )
+                    novo_link = (
+                        link_real
+                        + "&matt_tool=73653354"
+                    )
 
-else:
+                else:
 
-    novo_link = (
-        link_real
-        + "?matt_tool=73653354"
-    )
+                    novo_link = (
+                        link_real
+                        + "?matt_tool=73653354"
+                    )
 
                 print("NOVO LINK:", novo_link)
 
@@ -108,7 +108,7 @@ async def handler(event):
 
         print("MENSAGEM RECEBIDA")
 
-        # PEGA TEXO/CAPTION
+        # PEGA TEXTO/CAPTION
         texto = event.message.message or ""
 
         if not texto:
