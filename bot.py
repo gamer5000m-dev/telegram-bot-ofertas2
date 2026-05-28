@@ -53,24 +53,40 @@ async def gerar_link_afiliado_ml(link_produto):
 
                 print("LINK REAL:", link_real)
 
-                # REMOVE AFILIADOS ANTIGOS
+                # REMOVE matt_tool
                 link_real = re.sub(
-                    r'([&?])matt_tool=[^&]+',
+                    r'&matt_tool=[^&]+',
                     '',
                     link_real
                 )
 
                 link_real = re.sub(
-                    r'([&?])matt_word=[^&]+',
+                    r'\?matt_tool=[^&]+&?',
+                    '?',
+                    link_real
+                )
+
+                # REMOVE matt_word
+                link_real = re.sub(
+                    r'&matt_word=[^&]+',
                     '',
                     link_real
                 )
 
-                # LIMPA ?& BUGADO
+                link_real = re.sub(
+                    r'\?matt_word=[^&]+&?',
+                    '?',
+                    link_real
+                )
+
+                # LIMPEZA
                 link_real = link_real.replace("?&", "?")
+                link_real = link_real.replace("&&", "&")
 
-                # REMOVE ? NO FINAL
                 if link_real.endswith("?"):
+                    link_real = link_real[:-1]
+
+                if link_real.endswith("&"):
                     link_real = link_real[:-1]
 
                 # ADICIONA SEU AFILIADO
@@ -108,7 +124,7 @@ async def handler(event):
 
         print("MENSAGEM RECEBIDA")
 
-        # PEGA TEXTO/CAPTION
+        # TEXTO / CAPTION
         texto = event.message.message or ""
 
         if not texto:
