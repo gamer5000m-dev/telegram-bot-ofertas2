@@ -31,7 +31,10 @@ client.start(
 print("BOT ONLINE 🔥")
 
 
-# GERAR LINK AFILIADO ML
+# ==========================================
+# MERCADO LIVRE
+# ==========================================
+
 async def gerar_link_afiliado_ml(link_produto):
 
     try:
@@ -118,6 +121,42 @@ async def gerar_link_afiliado_ml(link_produto):
         return link_produto
 
 
+# ==========================================
+# SHOPEE
+# ==========================================
+
+async def gerar_link_shopee(link_produto):
+
+    try:
+
+        print("===================================")
+        print("INICIANDO PROCESSAMENTO SHOPEE 🔥")
+        print("LINK ORIGINAL:", link_produto)
+        print("===================================")
+
+        # POR ENQUANTO
+        # AINDA NÃO GERA AFILIADO
+        # APENAS RETORNA O LINK
+
+        novo_link = link_produto
+
+        print("LINK SHOPEE FINAL:", novo_link)
+
+        return novo_link
+
+    except Exception as e:
+
+        print("ERRO SHOPEE:", e)
+
+        traceback.print_exc()
+
+        return link_produto
+
+
+# ==========================================
+# EVENTO TELEGRAM
+# ==========================================
+
 @client.on(events.NewMessage(
     chats=canais_monitorados,
     incoming=True
@@ -190,7 +229,10 @@ async def handler(event):
                 print("ANALISANDO LINK...")
                 print("===================================")
 
+                # ==========================================
                 # MERCADO LIVRE
+                # ==========================================
+
                 if (
                     "mercadolivre" in link.lower()
                     or "meli.la" in link.lower()
@@ -208,13 +250,26 @@ async def handler(event):
                         texto
                     )
 
+                # ==========================================
                 # SHOPEE
+                # ==========================================
+
                 elif (
                     "shopee" in link.lower()
                     or "s.shopee.com.br" in link.lower()
                 ):
 
                     print("LINK SHOPEE DETECTADO 🔥")
+
+                    novo_link = await gerar_link_shopee(link)
+
+                    print("LINK NOVO SHOPEE:", novo_link)
+
+                    texto = re.sub(
+                        re.escape(link),
+                        novo_link,
+                        texto
+                    )
 
                 else:
 
