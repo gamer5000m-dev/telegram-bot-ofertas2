@@ -54,12 +54,11 @@ async def gerar_link_afiliado_ml(link_produto):
 
                 print("LINK ORIGINAL:", link_produto)
 
-                # PEGA LINK FINAL REAL
                 link_real = str(response.real_url)
 
                 print("LINK REAL:", link_real)
 
-                # REMOVE matt_tool
+                # REMOVE AFILIADOS ANTIGOS
                 link_real = re.sub(
                     r'&matt_tool=[^&]+',
                     '',
@@ -72,7 +71,6 @@ async def gerar_link_afiliado_ml(link_produto):
                     link_real
                 )
 
-                # REMOVE matt_word
                 link_real = re.sub(
                     r'&matt_word=[^&]+',
                     '',
@@ -95,7 +93,7 @@ async def gerar_link_afiliado_ml(link_produto):
                 if link_real.endswith("&"):
                     link_real = link_real[:-1]
 
-                # ADICIONA AFILIADO
+                # ADICIONA SEU AFILIADO
                 if "?" in link_real:
 
                     novo_link = (
@@ -145,10 +143,13 @@ async def gerar_link_shopee(link_produto):
 
             page = await browser.new_page()
 
+            # TIMEOUT MAIS LEVE
+            page.set_default_timeout(15000)
+
             await page.goto(
                 "https://affiliate.shopee.com.br/",
-                wait_until="domcontentloaded",
-                timeout=60000
+                wait_until="load",
+                timeout=30000
             )
 
             print("SHOPEE ABERTA 🔥")
@@ -157,14 +158,14 @@ async def gerar_link_shopee(link_produto):
 
             print("TITULO PAGINA:", titulo)
 
-            # HTML DA PÁGINA
+            # HTML LEVE
             conteudo = await page.content()
 
             print("===================================")
             print("HTML SHOPEE 🔥")
             print("===================================")
 
-            print(conteudo[:5000])
+            print(conteudo[:1000])
 
             print("===================================")
 
@@ -242,7 +243,7 @@ async def handler(event):
 
         texto = str(texto).strip()
 
-        # SEM TEXTO E SEM FOTO
+        # IGNORA MSG VAZIA
         if not texto and not event.photo:
 
             print("SEM TEXTO E SEM FOTO")
@@ -251,7 +252,7 @@ async def handler(event):
         print("TEXTO ORIGINAL:")
         print(texto)
 
-        # REMOVE MARCA D'ÁGUA
+        # REMOVE MARCA
         texto = re.sub(
             r"📍.*",
             "",
