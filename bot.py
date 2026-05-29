@@ -264,6 +264,14 @@ async def processar_oferta(link):
 
     html = await pegar_html(link)
 
+print("")
+print("URL ANALISADA 🔥")
+print(link)
+
+print("")
+print("HTML CARREGADO 🔥")
+print(html[:5000])
+
     titulo = pegar_titulo(html)
 
     preco = pegar_preco(html)
