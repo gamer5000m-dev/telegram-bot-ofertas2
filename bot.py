@@ -49,6 +49,10 @@ async def pegar_html(url):
             timeout=60000
         )
 
+        print("")
+        print("URL FINAL 🔥")
+        print(page.url)
+
         await page.wait_for_timeout(5000)
 
         html = await page.content()
