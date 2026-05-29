@@ -32,10 +32,7 @@ client = TelegramClient(
     api_hash
 )
 
-client.start(
-    phone="+5561994348181",
-    code_callback=lambda: "82195"
-)
+client.start()
 
 print("BOT ONLINE 🔥")
 
@@ -126,7 +123,6 @@ async def gerar_link_afiliado_ml(link_produto):
 
         return link_produto
 
-
 # ==========================================
 # SHOPEE
 # ==========================================
@@ -144,17 +140,25 @@ async def gerar_link_shopee(link_produto):
 
             browser = await p.chromium.launch(
                 headless=True,
-                args=["--no-sandbox"]
+                args=[
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage"
+                ]
             )
 
-            page = await browser.new_page()
+            context = await browser.new_context()
+
+            page = await context.new_page()
 
             page.set_default_timeout(30000)
 
-            # ABRE SHOPEE
+            # ==========================================
+            # ABRE SHOPEE AFILIADOS
+            # ==========================================
+
             await page.goto(
                 "https://affiliate.shopee.com.br/",
-                wait_until="networkidle",
+                wait_until="domcontentloaded",
                 timeout=60000
             )
 
@@ -162,15 +166,33 @@ async def gerar_link_shopee(link_produto):
 
             print("SHOPEE ABERTA 🔥")
 
-            titulo = await page.title()
+            print(
+                "TITULO PAGINA:",
+                await page.title()
+            )
 
-            print("TITULO PAGINA:", titulo)
+            # SCREENSHOT HOME
+            await page.screenshot(
+                path="01_home.png",
+                full_page=True
+            )
 
-            # COOKIES
+            await client.send_file(
+                "me",
+                "01_home.png",
+                caption="HOME SHOPEE 🔥"
+            )
+
+            # ==========================================
+            # ACEITAR COOKIES
+            # ==========================================
+
             try:
 
-                await page.click(
-                    "text=Aceitar todos os cookies",
+                await page.locator(
+                    'button:has-text("Aceitar")'
+                ).click(
+                    force=True,
                     timeout=5000
                 )
 
@@ -182,7 +204,70 @@ async def gerar_link_shopee(link_produto):
 
                 print("COOKIES JA ACEITOS")
 
+            # ==========================================
+            # BOTAO INSERIR
+            # ==========================================
+
+            try:
+
+                print("PROCURANDO BOTAO INSERIR 🔥")
+
+                botao_inserir = page.locator(
+                    'button:has-text("Inserir")'
+                )
+
+                await botao_inserir.wait_for(
+                    timeout=15000
+                )
+
+                print("BOTAO INSERIR ENCONTRADO 🔥")
+
+                await botao_inserir.click(
+                    force=True
+                )
+
+                print("BOTAO INSERIR CLICADO 🔥")
+
+                await page.wait_for_timeout(8000)
+
+            except Exception as e:
+
+                print("ERRO BOTAO INSERIR:", e)
+
+                await page.screenshot(
+                    path="erro_inserir.png",
+                    full_page=True
+                )
+
+                await client.send_file(
+                    "me",
+                    "erro_inserir.png",
+                    caption="ERRO BOTAO INSERIR 🔥"
+                )
+
+                await browser.close()
+
+                return link_produto
+
+            # ==========================================
+            # SCREENSHOT LOGIN
+            # ==========================================
+
+            await page.screenshot(
+                path="02_login.png",
+                full_page=True
+            )
+
+            await client.send_file(
+                "me",
+                "02_login.png",
+                caption="TELA LOGIN 🔥"
+            )
+
+            # ==========================================
             # LOGIN
+            # ==========================================
+
             try:
 
                 print("PROCURANDO CAMPO LOGIN 🔥")
@@ -216,9 +301,14 @@ async def gerar_link_shopee(link_produto):
                     caption="ERRO LOGIN SHOPEE 🔥"
                 )
 
+                await browser.close()
+
                 return link_produto
 
+            # ==========================================
             # SENHA
+            # ==========================================
+
             try:
 
                 print("PROCURANDO CAMPO SENHA 🔥")
@@ -252,9 +342,14 @@ async def gerar_link_shopee(link_produto):
                     caption="ERRO SENHA SHOPEE 🔥"
                 )
 
+                await browser.close()
+
                 return link_produto
 
-            # BOTAO LOGIN
+            # ==========================================
+            # BOTAO ENTRAR
+            # ==========================================
+
             try:
 
                 print("PROCURANDO BOTAO LOGIN 🔥")
@@ -290,26 +385,32 @@ async def gerar_link_shopee(link_produto):
                     caption="ERRO BOTAO LOGIN 🔥"
                 )
 
+                await browser.close()
+
                 return link_produto
 
+            # ==========================================
             # ESPERA LOGIN
+            # ==========================================
+
             await page.wait_for_timeout(15000)
 
-            # SCREENSHOT
+            # ==========================================
+            # SCREENSHOT FINAL
+            # ==========================================
+
             await page.screenshot(
-                path="shopee.png",
+                path="03_logado.png",
                 full_page=True
             )
 
-            print("SCREENSHOT SALVA 🔥")
-
             await client.send_file(
                 "me",
-                "shopee.png",
+                "03_logado.png",
                 caption="LOGIN SHOPEE REALIZADO 🔥"
             )
 
-            print("SCREENSHOT ENVIADA 🔥")
+            print("LOGIN SHOPEE REALIZADO 🔥")
 
             await browser.close()
 
@@ -322,7 +423,6 @@ async def gerar_link_shopee(link_produto):
         traceback.print_exc()
 
         return link_produto
-
 
 # ==========================================
 # SHEIN
@@ -350,7 +450,6 @@ async def gerar_link_shein(link_produto):
         traceback.print_exc()
 
         return link_produto
-
 
 # ==========================================
 # EVENTO TELEGRAM
@@ -530,6 +629,5 @@ async def handler(event):
         print("ERRO GERAL:", e)
 
         traceback.print_exc()
-
 
 client.run_until_disconnected()
