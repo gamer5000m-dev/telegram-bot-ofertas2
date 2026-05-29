@@ -369,6 +369,15 @@ print("")
 print("BOT ONLINE 🔥")
 print("")
 
-client.start()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+if not BOT_TOKEN:
+    raise Exception(
+        "BOT_TOKEN não encontrado nas variáveis do Railway"
+    )
+
+client.start(
+    bot_token=BOT_TOKEN
+)
 
 client.run_until_disconnected()
