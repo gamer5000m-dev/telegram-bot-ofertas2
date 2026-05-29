@@ -160,6 +160,14 @@ async def gerar_link_shopee(link_produto):
 
             print("TITULO PAGINA:", titulo)
 
+            # CLICA NO BOTÃO INSERIR
+            await page.click("text=Inserir")
+
+            print("BOTAO INSERIR CLICADO 🔥")
+
+            # ESPERA CARREGAR
+            await page.wait_for_timeout(5000)
+
             # SCREENSHOT
             await page.screenshot(
                 path="shopee.png",
