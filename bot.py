@@ -152,7 +152,7 @@ async def gerar_link_shopee(link_produto):
                 timeout=60000
             )
 
-            # ESPERA RENDERIZAR
+            # ESPERA CARREGAR
             await page.wait_for_timeout(10000)
 
             print("SHOPEE ABERTA 🔥")
@@ -195,6 +195,30 @@ async def gerar_link_shopee(link_produto):
             except:
 
                 print("COOKIES JA ACEITOS")
+
+            # LOGIN
+            await page.fill(
+                'input[type="text"]',
+                'sheinop9@gmail.com'
+            )
+
+            print("LOGIN DIGITADO 🔥")
+
+            # SENHA
+            await page.fill(
+                'input[type="password"]',
+                'shopercar790P.'
+            )
+
+            print("SENHA DIGITADA 🔥")
+
+            # BOTAO ENTRAR
+            await page.click("button")
+
+            print("BOTAO ENTRAR CLICADO 🔥")
+
+            # ESPERA LOGIN
+            await page.wait_for_timeout(10000)
 
             # SCREENSHOT
             await page.screenshot(
