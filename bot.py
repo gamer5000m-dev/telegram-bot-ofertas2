@@ -51,7 +51,12 @@ async def pegar_html(url):
 
         print("")
         print("URL FINAL 🔥")
-        print(page.url)
+        print("")
+print("===================================")
+print("URL FINAL 🔥")
+print(page.url)
+print("===================================")
+print("")
 
         await page.wait_for_timeout(5000)
 
