@@ -1,3 +1,4 @@
+from playwright.async_api import async_playwright
 import re
 import os
 import aiohttp
@@ -34,16 +35,27 @@ HEADERS = {
 
 async def pegar_html(url):
 
-    async with aiohttp.ClientSession(
-        headers=HEADERS
-    ) as session:
+    async with async_playwright() as p:
 
-        async with session.get(
+        browser = await p.chromium.launch(
+            headless=True
+        )
+
+        page = await browser.new_page()
+
+        await page.goto(
             url,
-            allow_redirects=True
-        ) as response:
+            wait_until="networkidle",
+            timeout=60000
+        )
 
-            return await response.text()
+        await page.wait_for_timeout(5000)
+
+        html = await page.content()
+
+        await browser.close()
+
+        return html
 
 
 # =========================================
