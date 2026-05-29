@@ -129,6 +129,8 @@ async def gerar_link_afiliado_ml(link_produto):
 
 async def gerar_link_shopee(link_produto):
 
+    browser = None
+
     try:
 
         print("===================================")
@@ -169,18 +171,6 @@ async def gerar_link_shopee(link_produto):
             print(
                 "TITULO PAGINA:",
                 await page.title()
-            )
-
-            # SCREENSHOT HOME
-            await page.screenshot(
-                path="01_home.png",
-                full_page=True
-            )
-
-            await client.send_file(
-                "me",
-                "01_home.png",
-                caption="HOME SHOPEE 🔥"
             )
 
             # ==========================================
@@ -234,6 +224,8 @@ async def gerar_link_shopee(link_produto):
 
                 print("ERRO BOTAO INSERIR:", e)
 
+                traceback.print_exc()
+
                 await page.screenshot(
                     path="erro_inserir.png",
                     full_page=True
@@ -248,21 +240,6 @@ async def gerar_link_shopee(link_produto):
                 await browser.close()
 
                 return link_produto
-
-            # ==========================================
-            # SCREENSHOT LOGIN
-            # ==========================================
-
-            await page.screenshot(
-                path="02_login.png",
-                full_page=True
-            )
-
-            await client.send_file(
-                "me",
-                "02_login.png",
-                caption="TELA LOGIN 🔥"
-            )
 
             # ==========================================
             # LOGIN
@@ -289,6 +266,8 @@ async def gerar_link_shopee(link_produto):
             except Exception as e:
 
                 print("ERRO CAMPO LOGIN:", e)
+
+                traceback.print_exc()
 
                 await page.screenshot(
                     path="erro_login.png",
@@ -330,6 +309,8 @@ async def gerar_link_shopee(link_produto):
             except Exception as e:
 
                 print("ERRO CAMPO SENHA:", e)
+
+                traceback.print_exc()
 
                 await page.screenshot(
                     path="erro_senha.png",
@@ -373,6 +354,8 @@ async def gerar_link_shopee(link_produto):
             except Exception as e:
 
                 print("ERRO BOTAO LOGIN:", e)
+
+                traceback.print_exc()
 
                 await page.screenshot(
                     path="erro_botao.png",
@@ -421,6 +404,14 @@ async def gerar_link_shopee(link_produto):
         print("ERRO PLAYWRIGHT SHOPEE:", e)
 
         traceback.print_exc()
+
+        try:
+
+            if browser:
+                await browser.close()
+
+        except:
+            pass
 
         return link_produto
 
@@ -550,7 +541,17 @@ async def handler(event):
 
                     print("LINK SHOPEE DETECTADO 🔥")
 
-                    novo_link = await gerar_link_shopee(link)
+                    try:
+
+                        novo_link = await gerar_link_shopee(link)
+
+                    except Exception as e:
+
+                        print("ERRO SHOPEE:", e)
+
+                        traceback.print_exc()
+
+                        novo_link = link
 
                     print("LINK NOVO SHOPEE:", novo_link)
 
