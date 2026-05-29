@@ -1,412 +1,531 @@
-from playwright.async_api import async_playwright
-import re
-import os
-import aiohttp
-import asyncio
-
 from telethon import TelegramClient, events
+import os
+import re
+import aiohttp
+import traceback
 
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
+from playwright.async_api import async_playwright
 
-CANAL_ORIGEM = int(os.getenv("CANAL_ORIGEM"))
-CANAL_DESTINO = int(os.getenv("CANAL_DESTINO"))
+# ==========================================
+# VARIAVEIS
+# ==========================================
+
+api_id = int(os.getenv("API_ID"))
+api_hash = os.getenv("API_HASH")
+
+# ==========================================
+# TELEGRAM
+# ==========================================
+
+canal_destino = -1003914285353
+
+canais_monitorados = [
+    -1001353489373
+]
 
 client = TelegramClient(
-    "bot_session",
-    API_ID,
-    API_HASH
+    "/data/session",
+    api_id,
+    api_hash
 )
 
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 "
-        "(Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 "
-        "(KHTML, like Gecko) "
-        "Chrome/137.0.0.0 Safari/537.36"
-    )
-}
+client.start()
 
+print("BOT ONLINE 🔥")
 
-# =========================================
-# PEGAR HTML
-# =========================================
+# ==========================================
+# MERCADO LIVRE
+# ==========================================
 
-async def pegar_html(url):
-
-    async with async_playwright() as p:
-
-        browser = await p.chromium.launch(
-            headless=True
-        )
-
-        page = await browser.new_page()
-
-        await page.goto(
-            url,
-            wait_until="networkidle",
-            timeout=60000
-        )
-
-        print("")
-        print("URL FINAL 🔥")
-        print("")
-print("===================================")
-print("URL FINAL 🔥")
-print(page.url)
-print("===================================")
-print("")
-
-        await page.wait_for_timeout(5000)
-
-        html = await page.content()
-
-        await browser.close()
-
-        return html
-
-
-# =========================================
-# PEGAR TITULO
-# =========================================
-
-def pegar_titulo(html):
-
-    padroes = [
-
-        r'<meta property="og:title" content="(.*?)"',
-        r'<title>(.*?)</title>',
-
-    ]
-
-    for padrao in padroes:
-
-        resultado = re.search(
-            padrao,
-            html,
-            re.IGNORECASE
-        )
-
-        if resultado:
-
-            titulo = resultado.group(1)
-
-            titulo = re.sub(
-                r'\s+',
-                ' ',
-                titulo
-            ).strip()
-
-            return titulo
-
-    return "Oferta Imperdível"
-
-
-# =========================================
-# PEGAR PRECO
-# =========================================
-
-def pegar_preco(html):
-
-    padroes = [
-
-        r'R\$ ?[\d\.\,]+',
-        r'price.?content.?="([\d\.\,]+)"',
-
-    ]
-
-    for padrao in padroes:
-
-        resultado = re.search(
-            padrao,
-            html,
-            re.IGNORECASE
-        )
-
-        if resultado:
-
-            preco = resultado.group(0)
-
-            if "R$" not in preco:
-                preco = f"R$ {preco}"
-
-            return preco
-
-    return None
-
-
-# =========================================
-# PEGAR IMAGEM
-# =========================================
-
-def pegar_imagem(html):
-
-    padroes = [
-
-        r'<meta property="og:image" content="(.*?)"',
-        r'<meta name="twitter:image" content="(.*?)"',
-
-    ]
-
-    for padrao in padroes:
-
-        resultado = re.search(
-            padrao,
-            html,
-            re.IGNORECASE
-        )
-
-        if resultado:
-
-            return resultado.group(1)
-
-    return None
-
-
-# =========================================
-# DETECTAR PLATAFORMA
-# =========================================
-
-def detectar_plataforma(url):
-
-    url = url.lower()
-
-    if "shopee" in url:
-        return "Shopee", "🟠"
-
-    if "mercadolivre" in url:
-        return "Mercado Livre", "🟡"
-
-    if "shein" in url:
-        return "Shein", "⚫️"
-
-    return "Oferta", "🔥"
-
-
-# =========================================
-# MONTAR TEXTO
-# =========================================
-
-def montar_texto(
-    titulo,
-    preco,
-    plataforma,
-    emoji,
-    link
-):
-
-    texto = (
-        f"{emoji} {titulo} | #{plataforma}:\n\n"
-    )
-
-    if preco:
-
-        texto += (
-            f"✅ {preco}\n\n"
-        )
-
-    texto += (
-        f"🛒 COMPRE AQUI:\n"
-        f"🔗 {link}\n\n"
-        f"✳️ Preço e estoque limitados!"
-    )
-
-    return texto
-
-
-# =========================================
-# BAIXAR FOTO
-# =========================================
-
-async def baixar_foto(url):
+async def gerar_link_afiliado_ml(link_produto):
 
     try:
 
-        async with aiohttp.ClientSession(
-            headers=HEADERS
-        ) as session:
+        async with aiohttp.ClientSession() as session:
 
-            async with session.get(url) as response:
+            async with session.get(
+                link_produto,
+                allow_redirects=True,
+                timeout=20,
+                headers={
+                    "User-Agent": "Mozilla/5.0"
+                }
+            ) as response:
 
-                if response.status != 200:
-                    return None
+                print("LINK ORIGINAL:", link_produto)
 
-                conteudo = await response.read()
+                link_real = str(response.real_url)
 
-                with open(
-                    "produto.jpg",
-                    "wb"
-                ) as f:
+                print("LINK REAL:", link_real)
 
-                    f.write(conteudo)
+                # REMOVE AFILIADOS ANTIGOS
+                link_real = re.sub(
+                    r'&matt_tool=[^&]+',
+                    '',
+                    link_real
+                )
 
-                return "produto.jpg"
+                link_real = re.sub(
+                    r'\?matt_tool=[^&]+&?',
+                    '?',
+                    link_real
+                )
 
-    except:
-        return None
+                link_real = re.sub(
+                    r'&matt_word=[^&]+',
+                    '',
+                    link_real
+                )
 
+                link_real = re.sub(
+                    r'\?matt_word=[^&]+&?',
+                    '?',
+                    link_real
+                )
 
-# =========================================
-# PEGAR LINKS
-# =========================================
+                # LIMPEZA
+                link_real = link_real.replace("?&", "?")
+                link_real = link_real.replace("&&", "&")
 
-def pegar_links(texto):
+                if link_real.endswith("?"):
+                    link_real = link_real[:-1]
 
-    return re.findall(
-        r'https?://[^\s]+',
-        texto
-    )
+                if link_real.endswith("&"):
+                    link_real = link_real[:-1]
 
+                # SEU AFILIADO
+                if "?" in link_real:
 
-# =========================================
-# PROCESSAR OFERTA
-# =========================================
+                    novo_link = (
+                        link_real
+                        + "&matt_tool=73653354"
+                    )
 
-async def processar_oferta(link):
+                else:
 
-    print("")
-    print("PROCESSANDO 🔥")
-    print(link)
+                    novo_link = (
+                        link_real
+                        + "?matt_tool=73653354"
+                    )
 
-    plataforma, emoji = detectar_plataforma(link)
+                print("NOVO LINK:", novo_link)
 
-    html = await pegar_html(link)
+                return novo_link
 
-    print("")
-    print("URL ANALISADA 🔥")
-    print(link)
+    except Exception as e:
 
-    print("")
-    print("HTML CARREGADO 🔥")
-    print(html[:5000])
+        print("ERRO AFILIADO ML:", e)
 
-    titulo = pegar_titulo(html)
+        traceback.print_exc()
 
-    preco = pegar_preco(html)
+        return link_produto
 
-    imagem = pegar_imagem(html)
+# ==========================================
+# SHOPEE
+# ==========================================
 
-    texto = montar_texto(
-        titulo,
-        preco,
-        plataforma,
-        emoji,
-        link
-    )
+async def gerar_link_shopee(link_produto):
 
-    print("")
-    print("TEXTO FINAL 🔥")
-    print(texto)
-
-    foto = None
-
-    if imagem:
-
-        print("")
-        print("BAIXANDO FOTO 🔥")
-
-        foto = await baixar_foto(imagem)
+    browser = None
 
     try:
 
-        if foto and os.path.exists(foto):
+        print("===================================")
+        print("LINK SHOPEE DETECTADO 🔥")
+        print("LINK:", link_produto)
+        print("===================================")
 
-            await client.send_file(
-                CANAL_DESTINO,
-                foto,
-                caption=texto
+        async with async_playwright() as p:
+
+            browser = await p.chromium.launch(
+                headless=True,
+                args=[
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-blink-features=AutomationControlled"
+                ]
             )
 
-            os.remove(foto)
+            context = await browser.new_context()
 
-        else:
+            page = await context.new_page()
 
-            await client.send_message(
-                CANAL_DESTINO,
-                texto
+            page.set_default_timeout(30000)
+
+            # ==========================================
+            # LOGIN PAGE
+            # ==========================================
+
+            await page.goto(
+                "https://affiliate.shopee.com.br/login",
+                wait_until="domcontentloaded",
+                timeout=60000
             )
 
-        print("")
-        print("OFERTA ENVIADA 🔥")
+            print("PAGINA LOGIN ABERTA 🔥")
 
-    except Exception as erro:
+            await page.wait_for_timeout(5000)
 
-        print("")
-        print("ERRO AO ENVIAR 🔥")
-        print(erro)
+            # ==========================================
+            # LOGIN
+            # ==========================================
 
+            await page.wait_for_selector(
+                'input[type="text"]',
+                timeout=15000
+            )
 
-# =========================================
-# NOVA MENSAGEM
-# =========================================
+            await page.fill(
+                'input[type="text"]',
+                SHOPEE_LOGIN
+            )
 
-@client.on(
-    events.NewMessage(
-        chats=CANAL_ORIGEM
-    )
-)
+            print("LOGIN DIGITADO 🔥")
 
+            # ==========================================
+            # SENHA
+            # ==========================================
+
+            await page.wait_for_selector(
+                'input[type="password"]',
+                timeout=15000
+            )
+
+            await page.fill(
+                'input[type="password"]',
+                SHOPEE_SENHA
+            )
+
+            print("SENHA DIGITADA 🔥")
+
+            # ==========================================
+            # BOTAO LOGIN
+            # ==========================================
+
+            await page.wait_for_selector(
+                "button",
+                timeout=30000
+            )
+
+            print("BOTOES CARREGADOS 🔥")
+
+            botoes = page.locator("button")
+
+            total = await botoes.count()
+
+            print(f"TOTAL BOTOES: {total}")
+
+            clicou = False
+
+            for i in range(total):
+
+                try:
+
+                    botao = botoes.nth(i)
+
+                    texto_botao = await botao.inner_text()
+
+                    print(f"BOTAO {i}: {texto_botao}")
+
+                    if (
+                        "entrar" in texto_botao.lower()
+                        or "login" in texto_botao.lower()
+                    ):
+
+                        print("BOTAO LOGIN ENCONTRADO 🔥")
+
+                        await botao.click(
+                            force=True
+                        )
+
+                        print("BOTAO LOGIN CLICADO 🔥")
+
+                        clicou = True
+
+                        break
+
+                except:
+                    pass
+
+            if not clicou:
+
+                print("BOTAO LOGIN NAO ENCONTRADO ❌")
+
+                await browser.close()
+
+                return link_produto
+
+            # ==========================================
+            # ESPERA LOGIN
+            # ==========================================
+
+            await page.wait_for_timeout(10000)
+
+            print("LOGIN REALIZADO 🔥")
+
+            # ==========================================
+            # ABRE LINK PRODUTO
+            # ==========================================
+
+            await page.goto(
+                link_produto,
+                wait_until="domcontentloaded",
+                timeout=60000
+            )
+
+            print("LINK PRODUTO ABERTO 🔥")
+
+            await page.wait_for_timeout(10000)
+
+            # ==========================================
+            # PEGA LINK FINAL
+            # ==========================================
+
+            novo_link = page.url
+
+            print("LINK NOVO SHOPEE:", novo_link)
+
+            await browser.close()
+
+            return novo_link
+
+    except Exception as e:
+
+        print("ERRO SHOPEE:", e)
+
+        traceback.print_exc()
+
+        try:
+
+            if browser:
+                await browser.close()
+
+        except:
+            pass
+
+        return link_produto
+
+# ==========================================
+# SHEIN
+# ==========================================
+
+async def gerar_link_shein(link_produto):
+
+    try:
+
+        print("===================================")
+        print("LINK SHEIN ORIGINAL 🔥")
+        print(link_produto)
+        print("===================================")
+
+        return link_produto
+
+    except Exception as e:
+
+        print("ERRO SHEIN:", e)
+
+        traceback.print_exc()
+
+        return link_produto
+
+# ==========================================
+# EVENTO TELEGRAM
+# ==========================================
+
+@client.on(events.NewMessage(
+    chats=canais_monitorados,
+    incoming=True
+))
 async def handler(event):
 
     try:
 
-        texto = event.raw_text
-
-        print("")
         print("===================================")
         print("MENSAGEM RECEBIDA 🔥")
+        print("ID MSG:", event.id)
         print("===================================")
 
-        links = pegar_links(texto)
+        texto = ""
 
-        if not links:
+        if event.message.message:
 
-            print("SEM LINKS")
+            texto = event.message.message
+
+        elif event.message.raw_text:
+
+            texto = event.message.raw_text
+
+        elif event.text:
+
+            texto = event.text
+
+        texto = str(texto).strip()
+
+        if not texto and not event.photo:
+
             return
 
-        print("")
-        print("LINKS ENCONTRADOS 🔥")
-        print(links)
+        print("TEXTO ORIGINAL:")
+        print(texto)
 
-        for link in links:
+        # REMOVE MARCA
+        texto = re.sub(
+            r"📍.*",
+            "",
+            texto
+        ).strip()
+
+        print("TEXTO LIMPO:")
+        print(texto)
+
+        # LINKS
+        links = re.findall(
+            r"(https?://[^\s]+)",
+            texto
+        )
+
+        print("LINKS ENCONTRADOS:", links)
+
+        # ==========================================
+        # PROCESSA LINKS
+        # ==========================================
+
+        for i, link in enumerate(links):
 
             try:
 
-                await processar_oferta(link)
+                print("===================================")
+                print(f"LINK {i+1}: {link}")
+                print("ANALISANDO LINK...")
+                print("===================================")
 
-                await asyncio.sleep(2)
+                # ==========================================
+                # MERCADO LIVRE
+                # ==========================================
 
-            except Exception as erro:
+                if (
+                    "mercadolivre" in link.lower()
+                    or "meli.la" in link.lower()
+                ):
 
-                print("")
-                print("ERRO PROCESSANDO LINK 🔥")
-                print(erro)
+                    print("LINK ML DETECTADO 🔥")
 
-    except Exception as erro:
+                    novo_link = await gerar_link_afiliado_ml(link)
 
-        print("")
-        print("ERRO GERAL 🔥")
-        print(erro)
+                    texto = re.sub(
+                        re.escape(link),
+                        novo_link,
+                        texto
+                    )
 
+                # ==========================================
+                # SHOPEE
+                # ==========================================
 
-# =========================================
-# INICIAR
-# =========================================
+                elif (
 
-print("")
-print("BOT ONLINE 🔥")
-print("")
+                    "shopee" in link.lower()
+                    or "s.shopee.com.br" in link.lower()
+                    or "shope.ee" in link.lower()
+                    or "shp.ee" in link.lower()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+                ):
 
-if not BOT_TOKEN:
-    raise Exception(
-        "BOT_TOKEN não encontrado nas variáveis do Railway"
-    )
+                    print("LINK SHOPEE DETECTADO 🔥")
 
-client.start(
-    bot_token=BOT_TOKEN
-)
+                    try:
+
+                        novo_link = await gerar_link_shopee(link)
+
+                    except Exception as e:
+
+                        print("ERRO SHOPEE:", e)
+
+                        traceback.print_exc()
+
+                        novo_link = link
+
+                    texto = re.sub(
+                        re.escape(link),
+                        novo_link,
+                        texto
+                    )
+
+                # ==========================================
+                # SHEIN
+                # ==========================================
+
+                elif (
+
+                    "shein" in link.lower()
+                    or "onelink.shein.com" in link.lower()
+
+                ):
+
+                    print("LINK SHEIN DETECTADO 🔥")
+
+                    novo_link = await gerar_link_shein(link)
+
+                    texto = re.sub(
+                        re.escape(link),
+                        novo_link,
+                        texto
+                    )
+
+                else:
+
+                    print("LINK NÃO IDENTIFICADO")
+
+                print("FIM PROCESSAMENTO LINK 🔥")
+
+            except Exception as erro_link:
+
+                print("ERRO NO LINK:", erro_link)
+
+                traceback.print_exc()
+
+        print("===================================")
+        print("TEXTO FINAL:")
+        print(texto)
+        print("===================================")
+
+        # ==========================================
+        # ENVIO
+        # ==========================================
+
+        if event.photo:
+
+            print("ENVIANDO FOTO 🔥")
+
+            arquivo = await event.download_media()
+
+            await client.send_file(
+                canal_destino,
+                arquivo,
+                caption=texto,
+                link_preview=False
+            )
+
+        else:
+
+            print("ENVIANDO TEXTO 🔥")
+
+            await client.send_message(
+                canal_destino,
+                texto,
+                link_preview=True
+            )
+
+        print("OFERTA ENVIADA 🔥")
+
+    except Exception as e:
+
+        print("ERRO GERAL:", e)
+
+        traceback.print_exc()
+
+# ==========================================
+# START
+# ==========================================
 
 client.run_until_disconnected()
