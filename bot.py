@@ -143,13 +143,16 @@ async def gerar_link_shopee(link_produto):
 
             page = await browser.new_page()
 
-            page.set_default_timeout(15000)
+            page.set_default_timeout(30000)
 
             await page.goto(
                 "https://affiliate.shopee.com.br/",
-                wait_until="load",
-                timeout=30000
+                wait_until="networkidle",
+                timeout=60000
             )
+
+            # ESPERA RENDERIZAR
+            await page.wait_for_timeout(10000)
 
             print("SHOPEE ABERTA 🔥")
 
