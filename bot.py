@@ -13,6 +13,7 @@ from playwright.async_api import async_playwright
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 
+# SHOPEE
 SHOPEE_LOGIN = os.getenv("SHOPEE_LOGIN")
 SHOPEE_SENHA = os.getenv("SHOPEE_SENHA")
 
@@ -134,7 +135,7 @@ async def gerar_link_shopee(link_produto):
     try:
 
         print("===================================")
-        print("INICIANDO PLAYWRIGHT SHOPEE 🔥")
+        print("LINK SHOPEE DETECTADO 🔥")
         print("LINK:", link_produto)
         print("===================================")
 
@@ -144,7 +145,8 @@ async def gerar_link_shopee(link_produto):
                 headless=True,
                 args=[
                     "--no-sandbox",
-                    "--disable-dev-shm-usage"
+                    "--disable-dev-shm-usage",
+                    "--disable-blink-features=AutomationControlled"
                 ]
             )
 
@@ -155,253 +157,106 @@ async def gerar_link_shopee(link_produto):
             page.set_default_timeout(30000)
 
             # ==========================================
-            # ABRE SHOPEE AFILIADOS
+            # LOGIN PAGE
             # ==========================================
 
             await page.goto(
-                "https://affiliate.shopee.com.br/",
+                "https://affiliate.shopee.com.br/login",
                 wait_until="domcontentloaded",
                 timeout=60000
             )
 
-            await page.wait_for_timeout(10000)
+            print("PAGINA LOGIN ABERTA 🔥")
 
-            print("SHOPEE ABERTA 🔥")
-
-            print(
-                "TITULO PAGINA:",
-                await page.title()
-            )
-
-            # ==========================================
-            # ACEITAR COOKIES
-            # ==========================================
-
-            try:
-
-                await page.locator(
-                    'button:has-text("Aceitar")'
-                ).click(
-                    force=True,
-                    timeout=5000
-                )
-
-                print("COOKIES ACEITOS 🔥")
-
-                await page.wait_for_timeout(3000)
-
-            except:
-
-                print("COOKIES JA ACEITOS")
-
-            # ==========================================
-            # BOTAO INSERIR
-            # ==========================================
-
-            try:
-
-                print("PROCURANDO BOTAO INSERIR 🔥")
-
-                botao_inserir = page.locator(
-                    'button:has-text("Inserir")'
-                )
-
-                await botao_inserir.wait_for(
-                    timeout=15000
-                )
-
-                print("BOTAO INSERIR ENCONTRADO 🔥")
-
-                await botao_inserir.click(
-                    force=True
-                )
-
-                print("BOTAO INSERIR CLICADO 🔥")
-
-                await page.wait_for_timeout(8000)
-
-            except Exception as e:
-
-                print("ERRO BOTAO INSERIR:", e)
-
-                traceback.print_exc()
-
-                await page.screenshot(
-                    path="erro_inserir.png",
-                    full_page=True
-                )
-
-                await client.send_file(
-                    "me",
-                    "erro_inserir.png",
-                    caption="ERRO BOTAO INSERIR 🔥"
-                )
-
-                await browser.close()
-
-                return link_produto
+            await page.wait_for_timeout(5000)
 
             # ==========================================
             # LOGIN
             # ==========================================
 
-            try:
+            await page.wait_for_selector(
+                'input[type="text"]',
+                timeout=15000
+            )
 
-                print("PROCURANDO CAMPO LOGIN 🔥")
+            await page.fill(
+                'input[type="text"]',
+                SHOPEE_LOGIN
+            )
 
-                await page.wait_for_selector(
-                    'input[type="text"]',
-                    timeout=15000
-                )
-
-                print("CAMPO LOGIN ENCONTRADO 🔥")
-
-                await page.fill(
-                    'input[type="text"]',
-                    SHOPEE_LOGIN
-                )
-
-                print("LOGIN DIGITADO 🔥")
-
-            except Exception as e:
-
-                print("ERRO CAMPO LOGIN:", e)
-
-                traceback.print_exc()
-
-                await page.screenshot(
-                    path="erro_login.png",
-                    full_page=True
-                )
-
-                await client.send_file(
-                    "me",
-                    "erro_login.png",
-                    caption="ERRO LOGIN SHOPEE 🔥"
-                )
-
-                await browser.close()
-
-                return link_produto
+            print("LOGIN DIGITADO 🔥")
 
             # ==========================================
             # SENHA
             # ==========================================
 
-            try:
+            await page.wait_for_selector(
+                'input[type="password"]',
+                timeout=15000
+            )
 
-                print("PROCURANDO CAMPO SENHA 🔥")
+            await page.fill(
+                'input[type="password"]',
+                SHOPEE_SENHA
+            )
 
-                await page.wait_for_selector(
-                    'input[type="password"]',
-                    timeout=15000
-                )
-
-                print("CAMPO SENHA ENCONTRADO 🔥")
-
-                await page.fill(
-                    'input[type="password"]',
-                    SHOPEE_SENHA
-                )
-
-                print("SENHA DIGITADA 🔥")
-
-            except Exception as e:
-
-                print("ERRO CAMPO SENHA:", e)
-
-                traceback.print_exc()
-
-                await page.screenshot(
-                    path="erro_senha.png",
-                    full_page=True
-                )
-
-                await client.send_file(
-                    "me",
-                    "erro_senha.png",
-                    caption="ERRO SENHA SHOPEE 🔥"
-                )
-
-                await browser.close()
-
-                return link_produto
+            print("SENHA DIGITADA 🔥")
 
             # ==========================================
             # BOTAO ENTRAR
             # ==========================================
 
-            try:
+            botao_entrar = page.locator(
+                'button[type="submit"]'
+            )
 
-                print("PROCURANDO BOTAO LOGIN 🔥")
+            await botao_entrar.wait_for(
+                timeout=15000
+            )
 
-                botao_login = page.locator(
-                    'button:has-text("Entrar")'
-                ).last
+            print("BOTAO ENTRAR ENCONTRADO 🔥")
 
-                await botao_login.wait_for(
-                    timeout=15000
-                )
+            await botao_entrar.click(
+                force=True
+            )
 
-                print("BOTAO LOGIN ENCONTRADO 🔥")
-
-                await botao_login.click(
-                    force=True
-                )
-
-                print("BOTAO ENTRAR CLICADO 🔥")
-
-            except Exception as e:
-
-                print("ERRO BOTAO LOGIN:", e)
-
-                traceback.print_exc()
-
-                await page.screenshot(
-                    path="erro_botao.png",
-                    full_page=True
-                )
-
-                await client.send_file(
-                    "me",
-                    "erro_botao.png",
-                    caption="ERRO BOTAO LOGIN 🔥"
-                )
-
-                await browser.close()
-
-                return link_produto
+            print("BOTAO ENTRAR CLICADO 🔥")
 
             # ==========================================
             # ESPERA LOGIN
             # ==========================================
 
-            await page.wait_for_timeout(15000)
+            await page.wait_for_timeout(10000)
 
             # ==========================================
-            # SCREENSHOT FINAL
+            # ABRE LINK PRODUTO
             # ==========================================
 
-            await page.screenshot(
-                path="03_logado.png",
-                full_page=True
+            await page.goto(
+                link_produto,
+                wait_until="domcontentloaded",
+                timeout=60000
             )
 
-            await client.send_file(
-                "me",
-                "03_logado.png",
-                caption="LOGIN SHOPEE REALIZADO 🔥"
-            )
+            print("LINK PRODUTO ABERTO 🔥")
 
-            print("LOGIN SHOPEE REALIZADO 🔥")
+            await page.wait_for_timeout(10000)
+
+            # ==========================================
+            # PEGA LINK FINAL
+            # ==========================================
+
+            novo_link = page.url
+
+            print("LINK NOVO SHOPEE:", novo_link)
 
             await browser.close()
 
-        return link_produto
+            return novo_link
 
     except Exception as e:
 
-        print("ERRO PLAYWRIGHT SHOPEE:", e)
+        print("ERRO SHOPEE:", e)
 
         traceback.print_exc()
 
@@ -424,15 +279,11 @@ async def gerar_link_shein(link_produto):
     try:
 
         print("===================================")
-        print("INICIANDO PROCESSAMENTO SHEIN 🔥")
-        print("LINK ORIGINAL:", link_produto)
+        print("LINK SHEIN ORIGINAL 🔥")
+        print(link_produto)
         print("===================================")
 
-        novo_link = link_produto
-
-        print("LINK SHEIN FINAL:", novo_link)
-
-        return novo_link
+        return link_produto
 
     except Exception as e:
 
@@ -477,7 +328,6 @@ async def handler(event):
 
         if not texto and not event.photo:
 
-            print("SEM TEXTO E SEM FOTO")
             return
 
         print("TEXTO ORIGINAL:")
@@ -493,7 +343,7 @@ async def handler(event):
         print("TEXTO LIMPO:")
         print(texto)
 
-        # PEGA LINKS
+        # LINKS
         links = re.findall(
             r"(https?://[^\s]+)",
             texto
@@ -501,7 +351,10 @@ async def handler(event):
 
         print("LINKS ENCONTRADOS:", links)
 
+        # ==========================================
         # PROCESSA LINKS
+        # ==========================================
+
         for i, link in enumerate(links):
 
             try:
@@ -511,7 +364,10 @@ async def handler(event):
                 print("ANALISANDO LINK...")
                 print("===================================")
 
+                # ==========================================
                 # MERCADO LIVRE
+                # ==========================================
+
                 if (
                     "mercadolivre" in link.lower()
                     or "meli.la" in link.lower()
@@ -521,15 +377,16 @@ async def handler(event):
 
                     novo_link = await gerar_link_afiliado_ml(link)
 
-                    print("LINK NOVO:", novo_link)
-
                     texto = re.sub(
                         re.escape(link),
                         novo_link,
                         texto
                     )
 
+                # ==========================================
                 # SHOPEE
+                # ==========================================
+
                 elif (
 
                     "shopee" in link.lower()
@@ -553,15 +410,16 @@ async def handler(event):
 
                         novo_link = link
 
-                    print("LINK NOVO SHOPEE:", novo_link)
-
                     texto = re.sub(
                         re.escape(link),
                         novo_link,
                         texto
                     )
 
+                # ==========================================
                 # SHEIN
+                # ==========================================
+
                 elif (
 
                     "shein" in link.lower()
@@ -572,8 +430,6 @@ async def handler(event):
                     print("LINK SHEIN DETECTADO 🔥")
 
                     novo_link = await gerar_link_shein(link)
-
-                    print("LINK NOVO SHEIN:", novo_link)
 
                     texto = re.sub(
                         re.escape(link),
@@ -598,7 +454,10 @@ async def handler(event):
         print(texto)
         print("===================================")
 
-        # FOTO
+        # ==========================================
+        # ENVIO
+        # ==========================================
+
         if event.photo:
 
             print("ENVIANDO FOTO 🔥")
@@ -612,7 +471,6 @@ async def handler(event):
                 link_preview=False
             )
 
-        # TEXTO
         else:
 
             print("ENVIANDO TEXTO 🔥")
@@ -630,5 +488,9 @@ async def handler(event):
         print("ERRO GERAL:", e)
 
         traceback.print_exc()
+
+# ==========================================
+# START
+# ==========================================
 
 client.run_until_disconnected()
