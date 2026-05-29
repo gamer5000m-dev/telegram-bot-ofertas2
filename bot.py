@@ -150,9 +150,49 @@ async def gerar_link_shopee(link_produto):
                 ]
             )
 
-            context = await browser.new_context()
+            context = await browser.new_context(
+
+                user_agent=(
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/122.0.0.0 Safari/537.36"
+                ),
+
+                viewport={
+                    "width": 1366,
+                    "height": 768
+                },
+
+                locale="pt-BR",
+
+                timezone_id="America/Sao_Paulo"
+            )
 
             page = await context.new_page()
+
+            # ==========================================
+            # STEALTH
+            # ==========================================
+
+            await page.add_init_script("""
+
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => false,
+            });
+
+            window.chrome = {
+                runtime: {},
+            };
+
+            Object.defineProperty(navigator, 'languages', {
+                get: () => ['pt-BR', 'pt'],
+            });
+
+            Object.defineProperty(navigator, 'plugins', {
+                get: () => [1, 2, 3, 4, 5],
+            });
+
+            """)
 
             page.set_default_timeout(30000)
 
