@@ -24,7 +24,7 @@ client = TelegramClient(
     api_hash
 )
 
-# LOGIN
+# LOGIN TELEGRAM
 client.start(
     phone="+5561994348181",
     code_callback=lambda: "82195"
@@ -145,6 +145,7 @@ async def gerar_link_shopee(link_produto):
 
             page.set_default_timeout(30000)
 
+            # ABRE SHOPEE AFILIADOS
             await page.goto(
                 "https://affiliate.shopee.com.br/",
                 wait_until="networkidle",
@@ -160,13 +161,40 @@ async def gerar_link_shopee(link_produto):
 
             print("TITULO PAGINA:", titulo)
 
-            # CLICA NO BOTÃO INSERIR
+            # CLICA EM INSERIR
             await page.click("text=Inserir")
 
             print("BOTAO INSERIR CLICADO 🔥")
 
-            # ESPERA CARREGAR
             await page.wait_for_timeout(5000)
+
+            # ESCOLHE PORTUGUES
+            try:
+
+                await page.click("text=Português (BR)")
+
+                print("PORTUGUES SELECIONADO 🔥")
+
+                await page.wait_for_timeout(5000)
+
+            except:
+
+                print("PORTUGUES JA SELECIONADO")
+
+            # ACEITA COOKIES
+            try:
+
+                await page.click(
+                    "text=Aceitar todos os cookies"
+                )
+
+                print("COOKIES ACEITOS 🔥")
+
+                await page.wait_for_timeout(3000)
+
+            except:
+
+                print("COOKIES JA ACEITOS")
 
             # SCREENSHOT
             await page.screenshot(
@@ -176,14 +204,14 @@ async def gerar_link_shopee(link_produto):
 
             print("SCREENSHOT SALVA 🔥")
 
-            # ENVIA PRA VOCÊ NO TELEGRAM
+            # ENVIA SCREENSHOT
             await client.send_file(
                 "me",
                 "shopee.png",
                 caption="SCREENSHOT SHOPEE 🔥"
             )
 
-            print("SCREENSHOT ENVIADA NO TELEGRAM 🔥")
+            print("SCREENSHOT ENVIADA 🔥")
 
             await browser.close()
 
