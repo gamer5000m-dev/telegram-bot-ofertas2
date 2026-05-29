@@ -143,7 +143,6 @@ async def gerar_link_shopee(link_produto):
 
             page = await browser.new_page()
 
-            # TIMEOUT MAIS LEVE
             page.set_default_timeout(15000)
 
             await page.goto(
@@ -158,13 +157,22 @@ async def gerar_link_shopee(link_produto):
 
             print("TITULO PAGINA:", titulo)
 
-            # SCREENSHOT DA PÁGINA
+            # SCREENSHOT
             await page.screenshot(
                 path="shopee.png",
                 full_page=True
             )
 
             print("SCREENSHOT SALVA 🔥")
+
+            # ENVIA PRA VOCÊ NO TELEGRAM
+            await client.send_file(
+                "me",
+                "shopee.png",
+                caption="SCREENSHOT SHOPEE 🔥"
+            )
+
+            print("SCREENSHOT ENVIADA NO TELEGRAM 🔥")
 
             await browser.close()
 
@@ -277,10 +285,7 @@ async def handler(event):
                 print("ANALISANDO LINK...")
                 print("===================================")
 
-                # ==========================================
                 # MERCADO LIVRE
-                # ==========================================
-
                 if (
                     "mercadolivre" in link.lower()
                     or "meli.la" in link.lower()
@@ -298,10 +303,7 @@ async def handler(event):
                         texto
                     )
 
-                # ==========================================
                 # SHOPEE
-                # ==========================================
-
                 elif (
 
                     "shopee" in link.lower()
@@ -323,10 +325,7 @@ async def handler(event):
                         texto
                     )
 
-                # ==========================================
                 # SHEIN
-                # ==========================================
-
                 elif (
 
                     "shein" in link.lower()
