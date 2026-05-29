@@ -165,7 +165,9 @@ async def gerar_link_shopee(link_produto):
             print("HTML SHOPEE 🔥")
             print("===================================")
 
-            print(conteudo[:1000])
+            await page.screenshot(path="shopee.png")
+
+print("SCREENSHOT SALVA 🔥")
 
             print("===================================")
 
