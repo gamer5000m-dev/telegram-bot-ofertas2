@@ -4,21 +4,21 @@ import re
 import traceback
 
 # ==========================================
-# VARIAVEIS
+# CONFIGURAÇÃO
 # ==========================================
 
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
-
-# ==========================================
-# TELEGRAM
-# ==========================================
 
 canal_destino = -1003914285353
 
 canais_monitorados = [
     -1001353489373
 ]
+
+# ==========================================
+# TELEGRAM
+# ==========================================
 
 client = TelegramClient(
     "/data/session",
@@ -29,107 +29,6 @@ client = TelegramClient(
 client.start()
 
 print("BOT ONLINE 🔥")
-
-# ==========================================
-# MERCADO LIVRE
-# ==========================================
-
-async def gerar_link_afiliado_ml(link_produto):
-
-    try:
-
-        async with aiohttp.ClientSession() as session:
-
-            async with session.get(
-                link_produto,
-                allow_redirects=True,
-                timeout=20,
-                headers={
-                    "User-Agent": "Mozilla/5.0"
-                }
-            ) as response:
-
-                print("LINK ORIGINAL:", link_produto)
-
-                link_real = str(response.real_url)
-
-                print("LINK REAL:", link_real)
-
-                # REMOVE AFILIADOS ANTIGOS
-                link_real = re.sub(
-                    r'&matt_tool=[^&]+',
-                    '',
-                    link_real
-                )
-
-                link_real = re.sub(
-                    r'\?matt_tool=[^&]+&?',
-                    '?',
-                    link_real
-                )
-
-                link_real = re.sub(
-                    r'&matt_word=[^&]+',
-                    '',
-                    link_real
-                )
-
-                link_real = re.sub(
-                    r'\?matt_word=[^&]+&?',
-                    '?',
-                    link_real
-                )
-
-                # LIMPEZA
-                link_real = link_real.replace("?&", "?")
-                link_real = link_real.replace("&&", "&")
-
-                if link_real.endswith("?"):
-                    link_real = link_real[:-1]
-
-                if link_real.endswith("&"):
-                    link_real = link_real[:-1]
-
-                # SEU AFILIADO
-                if "?" in link_real:
-
-                    novo_link = (
-                        link_real
-                        + "&matt_tool=73653354"
-                    )
-
-                else:
-
-                    novo_link = (
-                        link_real
-                        + "?matt_tool=73653354"
-                    )
-
-                print("NOVO LINK:", novo_link)
-
-                return novo_link
-
-    except Exception as e:
-
-        print("ERRO AFILIADO ML:", e)
-
-        traceback.print_exc()
-
-        return link_produto
-
-# ==========================================
-# SHOPEE
-# ==========================================
-
- ==========================================
-           
-
-# ==========================================
-# SHEIN
-# ==========================================
-
-
-      
 
 # ==========================================
 # EVENTO TELEGRAM
@@ -178,48 +77,17 @@ async def handler(event):
             texto
         ).strip()
 
-        print("TEXTO LIMPO:")
+        # REMOVE TODOS OS LINKS
+        texto = re.sub(
+            r"https?://[^\s]+",
+            "",
+            texto
+        ).strip()
+
+        print("TEXTO FINAL:")
         print(texto)
 
         # ==========================================
-# TROCA TODOS OS LINKS POR UM MARCADOR
-# ==========================================
-
-texto = re.sub(
-    r'https?://[^\s]+',
-    '👉 COLE SEU LINK AQUI',
-    texto
-)
-
-print("TEXTO FINAL:")
-print(texto)
-
-        print("LINKS ENCONTRADOS:", links)
-
-        # ==========================================
-        # PROCESSA LINKS
-        # ==========================================
-
-        for i, link in enumerate(links):
-
-            try:
-
-                print("===================================")
-                print(f"LINK {i+1}: {link}")
-                print("ANALISANDO LINK...")
-                print("===================================")
-
-                # ==========================================
-                # MERCADO LIVRE
-                # ==========================================
- 
-==========================================
-                # SHOPEE
-                # =================================== ==========================================
-                # SHEIN
-                # ==========================================
-
-    ==========================================
         # ENVIO
         # ==========================================
 
@@ -243,7 +111,7 @@ print(texto)
             await client.send_message(
                 canal_destino,
                 texto,
-                link_preview=True
+                link_preview=False
             )
 
         print("OFERTA ENVIADA 🔥")
@@ -251,7 +119,6 @@ print(texto)
     except Exception as e:
 
         print("ERRO GERAL:", e)
-
         traceback.print_exc()
 
 # ==========================================
