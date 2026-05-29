@@ -158,18 +158,13 @@ async def gerar_link_shopee(link_produto):
 
             print("TITULO PAGINA:", titulo)
 
-            # HTML LEVE
-            conteudo = await page.content()
+            # SCREENSHOT DA PÁGINA
+            await page.screenshot(
+                path="shopee.png",
+                full_page=True
+            )
 
-            print("===================================")
-            print("HTML SHOPEE 🔥")
-            print("===================================")
-
-            await page.screenshot(path="shopee.png")
-
-print("SCREENSHOT SALVA 🔥")
-
-            print("===================================")
+            print("SCREENSHOT SALVA 🔥")
 
             await browser.close()
 
