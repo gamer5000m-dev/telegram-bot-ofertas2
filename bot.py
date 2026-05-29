@@ -203,30 +203,69 @@ async def gerar_link_shopee(link_produto):
             print("SENHA DIGITADA 🔥")
 
             # ==========================================
-            # BOTAO ENTRAR
+            # BOTAO LOGIN
             # ==========================================
 
-            botao_entrar = page.locator(
-                'button[type="submit"]'
+            await page.wait_for_selector(
+                "button",
+                timeout=30000
             )
 
-            await botao_entrar.wait_for(
-                timeout=15000
-            )
+            print("BOTOES CARREGADOS 🔥")
 
-            print("BOTAO ENTRAR ENCONTRADO 🔥")
+            botoes = page.locator("button")
 
-            await botao_entrar.click(
-                force=True
-            )
+            total = await botoes.count()
 
-            print("BOTAO ENTRAR CLICADO 🔥")
+            print(f"TOTAL BOTOES: {total}")
+
+            clicou = False
+
+            for i in range(total):
+
+                try:
+
+                    botao = botoes.nth(i)
+
+                    texto_botao = await botao.inner_text()
+
+                    print(f"BOTAO {i}: {texto_botao}")
+
+                    if (
+                        "entrar" in texto_botao.lower()
+                        or "login" in texto_botao.lower()
+                    ):
+
+                        print("BOTAO LOGIN ENCONTRADO 🔥")
+
+                        await botao.click(
+                            force=True
+                        )
+
+                        print("BOTAO LOGIN CLICADO 🔥")
+
+                        clicou = True
+
+                        break
+
+                except:
+                    pass
+
+            if not clicou:
+
+                print("BOTAO LOGIN NAO ENCONTRADO ❌")
+
+                await browser.close()
+
+                return link_produto
 
             # ==========================================
             # ESPERA LOGIN
             # ==========================================
 
             await page.wait_for_timeout(10000)
+
+            print("LOGIN REALIZADO 🔥")
 
             # ==========================================
             # ABRE LINK PRODUTO
