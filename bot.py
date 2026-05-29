@@ -272,11 +272,11 @@ print("")
 print("HTML CARREGADO 🔥")
 print(html[:5000])
 
-    titulo = pegar_titulo(html)
+titulo = pegar_titulo(html)
 
-    preco = pegar_preco(html)
+preco = pegar_preco(html)
 
-    imagem = pegar_imagem(html)
+imagem = pegar_imagem(html)
 
     texto = montar_texto(
         titulo,
