@@ -1,10 +1,7 @@
 from telethon import TelegramClient, events
 import os
 import re
-import aiohttp
 import traceback
-
-from playwright.async_api import async_playwright
 
 # ==========================================
 # VARIAVEIS
@@ -124,209 +121,15 @@ async def gerar_link_afiliado_ml(link_produto):
 # SHOPEE
 # ==========================================
 
-async def gerar_link_shopee(link_produto):
-
-    browser = None
-
-    try:
-
-        print("===================================")
-        print("LINK SHOPEE DETECTADO 🔥")
-        print("LINK:", link_produto)
-        print("===================================")
-
-        async with async_playwright() as p:
-
-            browser = await p.chromium.launch(
-                headless=True,
-                args=[
-                    "--no-sandbox",
-                    "--disable-dev-shm-usage",
-                    "--disable-blink-features=AutomationControlled"
-                ]
-            )
-
-            context = await browser.new_context()
-
-            page = await context.new_page()
-
-            page.set_default_timeout(30000)
-
-            # ==========================================
-            # LOGIN PAGE
-            # ==========================================
-
-            await page.goto(
-                "https://affiliate.shopee.com.br/login",
-                wait_until="domcontentloaded",
-                timeout=60000
-            )
-
-            print("PAGINA LOGIN ABERTA 🔥")
-
-            await page.wait_for_timeout(5000)
-
-            # ==========================================
-            # LOGIN
-            # ==========================================
-
-            await page.wait_for_selector(
-                'input[type="text"]',
-                timeout=15000
-            )
-
-            await page.fill(
-                'input[type="text"]',
-                SHOPEE_LOGIN
-            )
-
-            print("LOGIN DIGITADO 🔥")
-
-            # ==========================================
-            # SENHA
-            # ==========================================
-
-            await page.wait_for_selector(
-                'input[type="password"]',
-                timeout=15000
-            )
-
-            await page.fill(
-                'input[type="password"]',
-                SHOPEE_SENHA
-            )
-
-            print("SENHA DIGITADA 🔥")
-
-            # ==========================================
-            # BOTAO LOGIN
-            # ==========================================
-
-            await page.wait_for_selector(
-                "button",
-                timeout=30000
-            )
-
-            print("BOTOES CARREGADOS 🔥")
-
-            botoes = page.locator("button")
-
-            total = await botoes.count()
-
-            print(f"TOTAL BOTOES: {total}")
-
-            clicou = False
-
-            for i in range(total):
-
-                try:
-
-                    botao = botoes.nth(i)
-
-                    texto_botao = await botao.inner_text()
-
-                    print(f"BOTAO {i}: {texto_botao}")
-
-                    if (
-                        "entrar" in texto_botao.lower()
-                        or "login" in texto_botao.lower()
-                    ):
-
-                        print("BOTAO LOGIN ENCONTRADO 🔥")
-
-                        await botao.click(
-                            force=True
-                        )
-
-                        print("BOTAO LOGIN CLICADO 🔥")
-
-                        clicou = True
-
-                        break
-
-                except:
-                    pass
-
-            if not clicou:
-
-                print("BOTAO LOGIN NAO ENCONTRADO ❌")
-
-                await browser.close()
-
-                return link_produto
-
-            # ==========================================
-            # ESPERA LOGIN
-            # ==========================================
-
-            await page.wait_for_timeout(10000)
-
-            print("LOGIN REALIZADO 🔥")
-
-            # ==========================================
-            # ABRE LINK PRODUTO
-            # ==========================================
-
-            await page.goto(
-                link_produto,
-                wait_until="domcontentloaded",
-                timeout=60000
-            )
-
-            print("LINK PRODUTO ABERTO 🔥")
-
-            await page.wait_for_timeout(10000)
-
-            # ==========================================
-            # PEGA LINK FINAL
-            # ==========================================
-
-            novo_link = page.url
-
-            print("LINK NOVO SHOPEE:", novo_link)
-
-            await browser.close()
-
-            return novo_link
-
-    except Exception as e:
-
-        print("ERRO SHOPEE:", e)
-
-        traceback.print_exc()
-
-        try:
-
-            if browser:
-                await browser.close()
-
-        except:
-            pass
-
-        return link_produto
+ ==========================================
+           
 
 # ==========================================
 # SHEIN
 # ==========================================
 
-async def gerar_link_shein(link_produto):
 
-    try:
-
-        print("===================================")
-        print("LINK SHEIN ORIGINAL 🔥")
-        print(link_produto)
-        print("===================================")
-
-        return link_produto
-
-    except Exception as e:
-
-        print("ERRO SHEIN:", e)
-
-        traceback.print_exc()
-
-        return link_produto
+      
 
 # ==========================================
 # EVENTO TELEGRAM
@@ -402,94 +205,14 @@ async def handler(event):
                 # ==========================================
                 # MERCADO LIVRE
                 # ==========================================
-
-                if (
-                    "mercadolivre" in link.lower()
-                    or "meli.la" in link.lower()
-                ):
-
-                    print("LINK ML DETECTADO 🔥")
-
-                    novo_link = await gerar_link_afiliado_ml(link)
-
-                    texto = re.sub(
-                        re.escape(link),
-                        novo_link,
-                        texto
-                    )
-
-                # ==========================================
+ 
+==========================================
                 # SHOPEE
-                # ==========================================
-
-                elif (
-
-                    "shopee" in link.lower()
-                    or "s.shopee.com.br" in link.lower()
-                    or "shope.ee" in link.lower()
-                    or "shp.ee" in link.lower()
-
-                ):
-
-                    print("LINK SHOPEE DETECTADO 🔥")
-
-                    try:
-
-                        novo_link = await gerar_link_shopee(link)
-
-                    except Exception as e:
-
-                        print("ERRO SHOPEE:", e)
-
-                        traceback.print_exc()
-
-                        novo_link = link
-
-                    texto = re.sub(
-                        re.escape(link),
-                        novo_link,
-                        texto
-                    )
-
-                # ==========================================
+                # =================================== ==========================================
                 # SHEIN
                 # ==========================================
 
-                elif (
-
-                    "shein" in link.lower()
-                    or "onelink.shein.com" in link.lower()
-
-                ):
-
-                    print("LINK SHEIN DETECTADO 🔥")
-
-                    novo_link = await gerar_link_shein(link)
-
-                    texto = re.sub(
-                        re.escape(link),
-                        novo_link,
-                        texto
-                    )
-
-                else:
-
-                    print("LINK NÃO IDENTIFICADO")
-
-                print("FIM PROCESSAMENTO LINK 🔥")
-
-            except Exception as erro_link:
-
-                print("ERRO NO LINK:", erro_link)
-
-                traceback.print_exc()
-
-        print("===================================")
-        print("TEXTO FINAL:")
-        print(texto)
-        print("===================================")
-
-        # ==========================================
+    ==========================================
         # ENVIO
         # ==========================================
 
