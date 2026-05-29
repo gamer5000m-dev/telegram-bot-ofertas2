@@ -7,7 +7,7 @@ import traceback
 from playwright.async_api import async_playwright
 
 # ==========================================
-# VARIAVEIS DE AMBIENTE
+# VARIAVEIS
 # ==========================================
 
 api_id = int(os.getenv("API_ID"))
@@ -99,7 +99,7 @@ async def gerar_link_afiliado_ml(link_produto):
                 if link_real.endswith("&"):
                     link_real = link_real[:-1]
 
-                # ADICIONA AFILIADO
+                # SEU AFILIADO
                 if "?" in link_real:
 
                     novo_link = (
@@ -151,7 +151,7 @@ async def gerar_link_shopee(link_produto):
 
             page.set_default_timeout(30000)
 
-            # ABRE SHOPEE AFILIADOS
+            # ABRE SHOPEE
             await page.goto(
                 "https://affiliate.shopee.com.br/",
                 wait_until="networkidle",
@@ -166,31 +166,12 @@ async def gerar_link_shopee(link_produto):
 
             print("TITULO PAGINA:", titulo)
 
-            # BOTAO INSERIR
-            await page.click("text=Inserir")
-
-            print("BOTAO INSERIR CLICADO 🔥")
-
-            await page.wait_for_timeout(5000)
-
-            # PORTUGUES
-            try:
-
-                await page.click("text=Português (BR)")
-
-                print("PORTUGUES SELECIONADO 🔥")
-
-                await page.wait_for_timeout(5000)
-
-            except:
-
-                print("PORTUGUES JA SELECIONADO")
-
             # COOKIES
             try:
 
                 await page.click(
-                    "text=Aceitar todos os cookies"
+                    "text=Aceitar todos os cookies",
+                    timeout=5000
                 )
 
                 print("COOKIES ACEITOS 🔥")
@@ -202,27 +183,117 @@ async def gerar_link_shopee(link_produto):
                 print("COOKIES JA ACEITOS")
 
             # LOGIN
-            await page.fill(
-                'input[type="text"]',
-                SHOPEE_LOGIN
-            )
+            try:
 
-            print("LOGIN DIGITADO 🔥")
+                print("PROCURANDO CAMPO LOGIN 🔥")
+
+                await page.wait_for_selector(
+                    'input[type="text"]',
+                    timeout=15000
+                )
+
+                print("CAMPO LOGIN ENCONTRADO 🔥")
+
+                await page.fill(
+                    'input[type="text"]',
+                    SHOPEE_LOGIN
+                )
+
+                print("LOGIN DIGITADO 🔥")
+
+            except Exception as e:
+
+                print("ERRO CAMPO LOGIN:", e)
+
+                await page.screenshot(
+                    path="erro_login.png",
+                    full_page=True
+                )
+
+                await client.send_file(
+                    "me",
+                    "erro_login.png",
+                    caption="ERRO LOGIN SHOPEE 🔥"
+                )
+
+                return link_produto
 
             # SENHA
-            await page.fill(
-                'input[type="password"]',
-                SHOPEE_SENHA
-            )
+            try:
 
-            print("SENHA DIGITADA 🔥")
+                print("PROCURANDO CAMPO SENHA 🔥")
 
-            # ENTRAR
-            await page.click("button")
+                await page.wait_for_selector(
+                    'input[type="password"]',
+                    timeout=15000
+                )
 
-            print("BOTAO ENTRAR CLICADO 🔥")
+                print("CAMPO SENHA ENCONTRADO 🔥")
 
-            await page.wait_for_timeout(10000)
+                await page.fill(
+                    'input[type="password"]',
+                    SHOPEE_SENHA
+                )
+
+                print("SENHA DIGITADA 🔥")
+
+            except Exception as e:
+
+                print("ERRO CAMPO SENHA:", e)
+
+                await page.screenshot(
+                    path="erro_senha.png",
+                    full_page=True
+                )
+
+                await client.send_file(
+                    "me",
+                    "erro_senha.png",
+                    caption="ERRO SENHA SHOPEE 🔥"
+                )
+
+                return link_produto
+
+            # BOTAO LOGIN
+            try:
+
+                print("PROCURANDO BOTAO LOGIN 🔥")
+
+                botao_login = page.locator(
+                    'button:has-text("Entrar")'
+                ).last
+
+                await botao_login.wait_for(
+                    timeout=15000
+                )
+
+                print("BOTAO LOGIN ENCONTRADO 🔥")
+
+                await botao_login.click(
+                    force=True
+                )
+
+                print("BOTAO ENTRAR CLICADO 🔥")
+
+            except Exception as e:
+
+                print("ERRO BOTAO LOGIN:", e)
+
+                await page.screenshot(
+                    path="erro_botao.png",
+                    full_page=True
+                )
+
+                await client.send_file(
+                    "me",
+                    "erro_botao.png",
+                    caption="ERRO BOTAO LOGIN 🔥"
+                )
+
+                return link_produto
+
+            # ESPERA LOGIN
+            await page.wait_for_timeout(15000)
 
             # SCREENSHOT
             await page.screenshot(
@@ -232,11 +303,10 @@ async def gerar_link_shopee(link_produto):
 
             print("SCREENSHOT SALVA 🔥")
 
-            # ENVIA SCREENSHOT
             await client.send_file(
                 "me",
                 "shopee.png",
-                caption="SCREENSHOT SHOPEE 🔥"
+                caption="LOGIN SHOPEE REALIZADO 🔥"
             )
 
             print("SCREENSHOT ENVIADA 🔥")
@@ -315,7 +385,6 @@ async def handler(event):
 
         texto = str(texto).strip()
 
-        # IGNORA MSG VAZIA
         if not texto and not event.photo:
 
             print("SEM TEXTO E SEM FOTO")
@@ -429,7 +498,7 @@ async def handler(event):
         print(texto)
         print("===================================")
 
-        # ENVIA FOTO
+        # FOTO
         if event.photo:
 
             print("ENVIANDO FOTO 🔥")
@@ -443,7 +512,7 @@ async def handler(event):
                 link_preview=False
             )
 
-        # ENVIA TEXTO
+        # TEXTO
         else:
 
             print("ENVIANDO TEXTO 🔥")
