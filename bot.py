@@ -6,14 +6,22 @@ import traceback
 
 from playwright.async_api import async_playwright
 
-# API TELEGRAM
+# ==========================================
+# VARIAVEIS DE AMBIENTE
+# ==========================================
+
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 
-# CANAL DESTINO
+SHOPEE_LOGIN = os.getenv("SHOPEE_LOGIN")
+SHOPEE_SENHA = os.getenv("SHOPEE_SENHA")
+
+# ==========================================
+# TELEGRAM
+# ==========================================
+
 canal_destino = -1003914285353
 
-# CANAIS MONITORADOS
 canais_monitorados = [
     -1001353489373
 ]
@@ -24,14 +32,12 @@ client = TelegramClient(
     api_hash
 )
 
-# LOGIN TELEGRAM
 client.start(
     phone="+5561994348181",
     code_callback=lambda: "82195"
 )
 
 print("BOT ONLINE 🔥")
-
 
 # ==========================================
 # MERCADO LIVRE
@@ -93,7 +99,7 @@ async def gerar_link_afiliado_ml(link_produto):
                 if link_real.endswith("&"):
                     link_real = link_real[:-1]
 
-                # ADICIONA SEU AFILIADO
+                # ADICIONA AFILIADO
                 if "?" in link_real:
 
                     novo_link = (
@@ -152,7 +158,6 @@ async def gerar_link_shopee(link_produto):
                 timeout=60000
             )
 
-            # ESPERA CARREGAR
             await page.wait_for_timeout(10000)
 
             print("SHOPEE ABERTA 🔥")
@@ -161,14 +166,14 @@ async def gerar_link_shopee(link_produto):
 
             print("TITULO PAGINA:", titulo)
 
-            # CLICA EM INSERIR
+            # BOTAO INSERIR
             await page.click("text=Inserir")
 
             print("BOTAO INSERIR CLICADO 🔥")
 
             await page.wait_for_timeout(5000)
 
-            # ESCOLHE PORTUGUES
+            # PORTUGUES
             try:
 
                 await page.click("text=Português (BR)")
@@ -181,7 +186,7 @@ async def gerar_link_shopee(link_produto):
 
                 print("PORTUGUES JA SELECIONADO")
 
-            # ACEITA COOKIES
+            # COOKIES
             try:
 
                 await page.click(
@@ -199,7 +204,7 @@ async def gerar_link_shopee(link_produto):
             # LOGIN
             await page.fill(
                 'input[type="text"]',
-                'sheinop9@gmail.com'
+                SHOPEE_LOGIN
             )
 
             print("LOGIN DIGITADO 🔥")
@@ -207,17 +212,16 @@ async def gerar_link_shopee(link_produto):
             # SENHA
             await page.fill(
                 'input[type="password"]',
-                'shopercar790P.'
+                SHOPEE_SENHA
             )
 
             print("SENHA DIGITADA 🔥")
 
-            # BOTAO ENTRAR
+            # ENTRAR
             await page.click("button")
 
             print("BOTAO ENTRAR CLICADO 🔥")
 
-            # ESPERA LOGIN
             await page.wait_for_timeout(10000)
 
             # SCREENSHOT
