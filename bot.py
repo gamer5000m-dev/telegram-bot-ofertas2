@@ -181,11 +181,18 @@ async def handler(event):
         print("TEXTO LIMPO:")
         print(texto)
 
-        # LINKS
-        links = re.findall(
-            r"(https?://[^\s]+)",
-            texto
-        )
+        # ==========================================
+# TROCA TODOS OS LINKS POR UM MARCADOR
+# ==========================================
+
+texto = re.sub(
+    r'https?://[^\s]+',
+    '👉 COLE SEU LINK AQUI',
+    texto
+)
+
+print("TEXTO FINAL:")
+print(texto)
 
         print("LINKS ENCONTRADOS:", links)
 
