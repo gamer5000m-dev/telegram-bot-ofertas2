@@ -139,7 +139,8 @@ async def gerar_link_shopee(link_produto):
         async with async_playwright() as p:
 
             browser = await p.chromium.launch(
-                headless=True
+                headless=True,
+                args=["--no-sandbox"]
             )
 
             page = await browser.new_page()
@@ -155,6 +156,17 @@ async def gerar_link_shopee(link_produto):
             titulo = await page.title()
 
             print("TITULO PAGINA:", titulo)
+
+            # HTML DA PÁGINA
+            conteudo = await page.content()
+
+            print("===================================")
+            print("HTML SHOPEE 🔥")
+            print("===================================")
+
+            print(conteudo[:5000])
+
+            print("===================================")
 
             await browser.close()
 
@@ -181,9 +193,6 @@ async def gerar_link_shein(link_produto):
         print("INICIANDO PROCESSAMENTO SHEIN 🔥")
         print("LINK ORIGINAL:", link_produto)
         print("===================================")
-
-        # POR ENQUANTO
-        # RETORNA O MESMO LINK
 
         novo_link = link_produto
 
@@ -217,7 +226,6 @@ async def handler(event):
         print("ID MSG:", event.id)
         print("===================================")
 
-        # TEXTO
         texto = ""
 
         if event.message.message:
@@ -260,11 +268,6 @@ async def handler(event):
         )
 
         print("LINKS ENCONTRADOS:", links)
-
-        # SEM LINKS
-        if not links:
-
-            print("SEM LINKS NA MENSAGEM")
 
         # PROCESSA LINKS
         for i, link in enumerate(links):
