@@ -327,6 +327,18 @@ async def gerar_link_shopee(link_produto):
 
             novo_link = page.url
 
+            # ==========================================
+            # BLOQUEIO SHOPEE
+            # ==========================================
+
+            if "verify/traffic/error" in novo_link:
+
+                print("SHOPEE BLOQUEOU IP 🔥")
+
+                await browser.close()
+
+                return link_produto
+
             print("LINK NOVO SHOPEE:", novo_link)
 
             await browser.close()
@@ -527,6 +539,14 @@ async def handler(event):
                 print("ERRO NO LINK:", erro_link)
 
                 traceback.print_exc()
+
+        # ==========================================
+        # LIMITA TAMANHO CAPTION
+        # ==========================================
+
+        if len(texto) > 900:
+
+            texto = texto[:900] + "\n\n..."
 
         print("===================================")
         print("TEXTO FINAL:")
