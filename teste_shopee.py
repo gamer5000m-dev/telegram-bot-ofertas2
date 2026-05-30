@@ -20,11 +20,16 @@ async def main():
 
         page = await browser.new_page()
 
+        print("ABRINDO SHOPEE...")
+
         await page.goto(
             "https://affiliate.shopee.com.br",
             wait_until="networkidle",
             timeout=60000
         )
+
+        print("URL:", page.url)
+        print("TITULO:", await page.title())
 
         await page.screenshot(
             path="screenshot.png",
@@ -33,21 +38,26 @@ async def main():
 
         print("SCREENSHOT SALVO")
 
+        print("CHAT_ID:", CHAT_ID)
+
         async with aiohttp.ClientSession() as session:
 
             with open("screenshot.png", "rb") as foto:
+
+                foto_bytes = foto.read()
 
                 data = aiohttp.FormData()
 
                 data.add_field(
                     "chat_id",
-                    CHAT_ID
+                    str(CHAT_ID)
                 )
 
                 data.add_field(
                     "photo",
-                    foto,
-                    filename="screenshot.png"
+                    foto_bytes,
+                    filename="screenshot.png",
+                    content_type="image/png"
                 )
 
                 resposta = await session.post(
@@ -55,7 +65,10 @@ async def main():
                     data=data
                 )
 
-                print(await resposta.text())
+                texto = await resposta.text()
+
+                print("RESPOSTA TELEGRAM:")
+                print(texto)
 
         await browser.close()
 
