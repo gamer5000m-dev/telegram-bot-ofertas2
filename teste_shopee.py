@@ -40,6 +40,19 @@ async def main():
 
         print("EMAIL E SENHA PREENCHIDOS")
 
+        try:
+
+            await page.get_by_text(
+                "Aceitar todos os cookies",
+                exact=False
+            ).click(timeout=5000)
+
+            print("COOKIES ACEITOS")
+
+        except:
+
+            print("SEM POPUP DE COOKIES")
+
         botoes = page.locator("button")
 
         total = await botoes.count()
@@ -57,24 +70,9 @@ async def main():
             except:
                 pass
 
-        try:
-
-            await page.get_by_text(
-                "Aceitar todos os cookies",
-                exact=False
-            ).click(timeout=5000)
-
-            print("COOKIES ACEITOS")
-
-        except:
-
-            print("SEM POPUP DE COOKIES")
-
         print("CLICANDO EM ENTRAR...")
 
-        await botoes.nth(2).click(
-            force=True
-        )
+        await botoes.nth(2).click(force=True)
 
         await page.wait_for_timeout(10000)
 
@@ -99,6 +97,22 @@ async def main():
             "BOTOES:",
             await page.locator("button").count()
         )
+
+        print("\n====================")
+        print("TEXTO DA PAGINA")
+        print("====================\n")
+
+        try:
+
+            texto_pagina = await page.locator(
+                "body"
+            ).inner_text()
+
+            print(texto_pagina)
+
+        except Exception as e:
+
+            print("ERRO AO LER PAGINA:", e)
 
         await page.screenshot(
             path="depois_login.png",
