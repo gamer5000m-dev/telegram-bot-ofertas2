@@ -86,9 +86,8 @@ async def handler(event):
 
         # TROCA A FRASE
         texto = texto.replace(
-            "✳️ Preço e estoque limitados,              não perca!",
-            "🔥 Oferta relâmpago! Aproveite     já!"
-
+    "✳️ Preço e estoque limitados, não perca!",
+    "🔥 Oferta relâmpago! Aproveite já!"
 )
         print("TEXTO FINAL:")
         print(texto)
