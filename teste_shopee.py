@@ -1,7 +1,9 @@
+import os
 import asyncio
 from playwright.async_api import async_playwright
 
-LINK_TESTE = "https://s.shopee.com.br/5L97hNyYVQ"
+SHOPEE_EMAIL = os.getenv("SHOPEE_EMAIL")
+SHOPEE_SENHA = os.getenv("SHOPEE_SENHA")
 
 async def main():
 
@@ -17,56 +19,26 @@ async def main():
 
         page = await browser.new_page()
 
-        print("ABRINDO SHOPEE...")
+        print("ABRINDO LOGIN...")
 
         await page.goto(
-            "https://affiliate.shopee.com.br",
+            "https://affiliate.shopee.com.br/login",
             wait_until="networkidle",
             timeout=60000
         )
 
-        print("URL ATUAL:", page.url)
+        print("URL:", page.url)
+        print("TITULO:", await page.title())
 
-        print("TÍTULO:", await page.title())
-
-        print(
-            "TEXTAREAS:",
-            await page.locator("textarea").count()
-        )
-
-        print(
-            "INPUTS:",
-            await page.locator("input").count()
-        )
-
-        print(
-            "BOTOES:",
-            await page.locator("button").count()
-        )
-
-        html = await page.content()
-
-        print("HTML INICIO:")
-        print(html[:5000])
+        print("INPUTS:", await page.locator("input").count())
+        print("BOTOES:", await page.locator("button").count())
 
         await page.screenshot(
-            path="shopee.png",
+            path="login.png",
             full_page=True
         )
 
-        print("SCREENSHOT SALVO")
-
-        try:
-
-            await page.locator(
-                "textarea"
-            ).first.fill(LINK_TESTE)
-
-            print("LINK PREENCHIDO")
-
-        except Exception as e:
-
-            print("ERRO AO PREENCHER:", e)
+        print("SCREENSHOT LOGIN SALVO")
 
         await browser.close()
 
