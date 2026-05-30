@@ -30,13 +30,25 @@ async def main():
         print("URL:", page.url)
         print("TITULO:", await page.title())
 
+        try:
+
+            await page.get_by_text(
+                "Aceitar todos os cookies",
+                exact=False
+            ).click(timeout=5000)
+
+            print("COOKIES ACEITOS")
+
+            await page.wait_for_timeout(2000)
+
+        except:
+
+            print("SEM POPUP DE COOKIES")
+
         email = page.locator("input").nth(0)
         senha = page.locator("input").nth(1)
 
-        await email.click()
         await email.fill(SHOPEE_EMAIL)
-
-        await senha.click()
         await senha.fill(SHOPEE_SENHA)
 
         print(
@@ -50,19 +62,6 @@ async def main():
         )
 
         print("EMAIL E SENHA PREENCHIDOS")
-
-        try:
-
-            await page.get_by_text(
-                "Aceitar todos os cookies",
-                exact=False
-            ).click(timeout=5000)
-
-            print("COOKIES ACEITOS")
-
-        except:
-
-            print("SEM POPUP DE COOKIES")
 
         botoes = page.locator("button")
 
