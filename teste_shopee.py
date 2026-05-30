@@ -19,23 +19,26 @@ async def main():
 
         page = await browser.new_page()
 
+        print("ABRINDO LOGIN...")
+
         await page.goto(
             "https://shopee.com.br/buyer/login?next=https://affiliate.shopee.com.br/login",
             wait_until="networkidle",
             timeout=60000
         )
 
-        print("PREENCHENDO LOGIN...")
+        print("URL:", page.url)
+        print("TITULO:", await page.title())
 
-        await page.locator("input").nth(0).fill(SHOPEE_EMAIL)
-        await page.locator("input").nth(1).fill(SHOPEE_SENHA)
+        await page.locator("input").nth(0).fill(
+            SHOPEE_EMAIL
+        )
+
+        await page.locator("input").nth(1).fill(
+            SHOPEE_SENHA
+        )
 
         print("EMAIL E SENHA PREENCHIDOS")
-
-        await page.screenshot(
-            path="antes_login.png",
-            full_page=True
-        )
 
         botoes = page.locator("button")
 
@@ -53,6 +56,41 @@ async def main():
 
             except:
                 pass
+
+        print("CLICANDO EM ENTRAR...")
+
+        await botoes.nth(2).click()
+
+        await page.wait_for_timeout(10000)
+
+        print("URL APÓS LOGIN:", page.url)
+
+        print(
+            "TÍTULO APÓS LOGIN:",
+            await page.title()
+        )
+
+        print(
+            "TEXTAREAS:",
+            await page.locator("textarea").count()
+        )
+
+        print(
+            "INPUTS:",
+            await page.locator("input").count()
+        )
+
+        print(
+            "BOTOES:",
+            await page.locator("button").count()
+        )
+
+        await page.screenshot(
+            path="depois_login.png",
+            full_page=True
+        )
+
+        print("SCREENSHOT SALVO")
 
         await browser.close()
 
