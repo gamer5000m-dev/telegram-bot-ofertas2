@@ -32,31 +32,48 @@ ofertas_pendentes = {}
 # RECEBE OFERTAS
 # ==========================================
 
-@client.on(events.NewMessage(
-    chats=canais_monitorados
-))
+@client.on(events.NewMessage(chats=canais_monitorados))
 async def receber_oferta(event):
 
     try:
 
         texto = event.raw_text or ""
 
-        # TROCA FRASE
-        texto = re.sub(
-            r".*Preço e estoque limitados.*",
-            "🔥 Oferta relâmpago! Aproveite já!",
-            texto
-        )
+        if not texto and not event.photo:
+            return
 
-        # TROCA LINK POR MARCADOR
+        # Remove links
         texto = re.sub(
             r"https?://[^\s]+",
             "{LINK}",
             texto
         )
 
-        if not texto and not event.photo:
-            return
+        # Remove linha do eieutil
+        texto = re.sub(
+            r"📍.*",
+            "",
+            texto,
+            flags=re.MULTILINE
+        )
+
+        texto = re.sub(
+            r"eieutil\.com[^\n]*",
+            "",
+            texto,
+            flags=re.IGNORECASE
+        )
+
+        # Troca frase
+        texto = re.sub(
+            r".*Preço e estoque limitados.*",
+            "🔥 Oferta relâmpago! Aproveite já!",
+            texto,
+            flags=re.IGNORECASE
+        )
+
+        # Troca símbolo
+        texto = texto.replace("🎫", "🎟")
 
         foto = None
 
@@ -66,7 +83,7 @@ async def receber_oferta(event):
         mensagem = (
             "🔥 NOVA OFERTA\n\n"
             f"{texto}\n\n"
-            "➡️ RESPONDA ESTA MENSAGEM COM SEU LINK."
+            "➡️ RESPONDA ESTA MENSAGEM COM SEU LINK DE AFILIADO"
         )
 
         if foto:
@@ -90,7 +107,6 @@ async def receber_oferta(event):
         }
 
         print("OFERTA ENVIADA PARA ME")
-        print("ID:", enviada.id)
 
     except Exception as e:
 
@@ -123,6 +139,12 @@ async def responder_link(event):
             link
         )
 
+        texto_final = re.sub(
+            r"\n\s*\n\s*\n+",
+            "\n\n",
+            texto_final
+        )
+
         if dados["foto"]:
 
             await client.send_file(
@@ -141,7 +163,7 @@ async def responder_link(event):
             )
 
         await event.reply(
-            "✅ Oferta publicada."
+            "✅ Oferta publicada no canal."
         )
 
         del ofertas_pendentes[resposta.id]
