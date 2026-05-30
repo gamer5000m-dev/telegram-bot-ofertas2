@@ -30,13 +30,24 @@ async def main():
         print("URL:", page.url)
         print("TITULO:", await page.title())
 
-        await page.locator("input").nth(0).fill(
-            SHOPEE_EMAIL
-        )
+        email = page.locator("input").nth(0)
+senha = page.locator("input").nth(1)
 
-        await page.locator("input").nth(1).fill(
-            SHOPEE_SENHA
-        )
+await email.click()
+await email.fill(SHOPEE_EMAIL)
+
+await senha.click()
+await senha.fill(SHOPEE_SENHA)
+
+print(
+    "EMAIL DIGITADO:",
+    await email.input_value()
+)
+
+print(
+    "SENHA TAMANHO:",
+    len(await senha.input_value())
+)
 
         print("EMAIL E SENHA PREENCHIDOS")
 
