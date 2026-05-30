@@ -1,11 +1,23 @@
+from telethon import TelegramClient
 import os
 import asyncio
 from playwright.async_api import async_playwright
 
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
+
 SHOPEE_EMAIL = os.getenv("SHOPEE_EMAIL")
 SHOPEE_SENHA = os.getenv("SHOPEE_SENHA")
 
+client = TelegramClient(
+    "screenshot_session",
+    API_ID,
+    API_HASH
+)
+
 async def main():
+
+    await client.start()
 
     async with async_playwright() as p:
 
@@ -88,42 +100,6 @@ async def main():
 
         print("URL APÓS LOGIN:", page.url)
 
-        print(
-            "TÍTULO APÓS LOGIN:",
-            await page.title()
-        )
-
-        print(
-            "TEXTAREAS:",
-            await page.locator("textarea").count()
-        )
-
-        print(
-            "INPUTS:",
-            await page.locator("input").count()
-        )
-
-        print(
-            "BOTOES:",
-            await page.locator("button").count()
-        )
-
-        print("\n====================")
-        print("TEXTO DA PAGINA")
-        print("====================\n")
-
-        try:
-
-            texto_pagina = await page.locator(
-                "body"
-            ).inner_text()
-
-            print(texto_pagina)
-
-        except Exception as e:
-
-            print("ERRO AO LER PAGINA:", e)
-
         await page.screenshot(
             path="depois_login.png",
             full_page=True
@@ -131,6 +107,16 @@ async def main():
 
         print("SCREENSHOT SALVO")
 
+        await client.send_file(
+            "me",
+            "depois_login.png",
+            caption="Screenshot Shopee"
+        )
+
+        print("SCREENSHOT ENVIADO")
+
         await browser.close()
+
+    await client.disconnect()
 
 asyncio.run(main())
