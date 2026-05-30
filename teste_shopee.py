@@ -19,26 +19,40 @@ async def main():
 
         page = await browser.new_page()
 
-        print("ABRINDO LOGIN...")
-
         await page.goto(
-            "https://affiliate.shopee.com.br/login",
+            "https://shopee.com.br/buyer/login?next=https://affiliate.shopee.com.br/login",
             wait_until="networkidle",
             timeout=60000
         )
 
-        print("URL:", page.url)
-        print("TITULO:", await page.title())
+        print("PREENCHENDO LOGIN...")
 
-        print("INPUTS:", await page.locator("input").count())
-        print("BOTOES:", await page.locator("button").count())
+        await page.locator("input").nth(0).fill(SHOPEE_EMAIL)
+        await page.locator("input").nth(1).fill(SHOPEE_SENHA)
+
+        print("EMAIL E SENHA PREENCHIDOS")
 
         await page.screenshot(
-            path="login.png",
+            path="antes_login.png",
             full_page=True
         )
 
-        print("SCREENSHOT LOGIN SALVO")
+        botoes = page.locator("button")
+
+        total = await botoes.count()
+
+        print("TOTAL BOTOES:", total)
+
+        for i in range(total):
+
+            try:
+
+                texto = await botoes.nth(i).inner_text()
+
+                print(f"BOTAO {i}: {texto}")
+
+            except:
+                pass
 
         await browser.close()
 
