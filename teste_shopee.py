@@ -21,9 +21,11 @@ async def main():
 
         await page.goto(
             "https://affiliate.shopee.com.br",
-            wait_until="domcontentloaded",
+            wait_until="networkidle",
             timeout=60000
         )
+
+        print("URL ATUAL:", page.url)
 
         print("TÍTULO:", await page.title())
 
@@ -42,6 +44,18 @@ async def main():
             await page.locator("button").count()
         )
 
+        html = await page.content()
+
+        print("HTML INICIO:")
+        print(html[:5000])
+
+        await page.screenshot(
+            path="shopee.png",
+            full_page=True
+        )
+
+        print("SCREENSHOT SALVO")
+
         try:
 
             await page.locator(
@@ -53,13 +67,6 @@ async def main():
         except Exception as e:
 
             print("ERRO AO PREENCHER:", e)
-
-        await page.screenshot(
-            path="shopee.png",
-            full_page=True
-        )
-
-        print("SCREENSHOT SALVO")
 
         await browser.close()
 
