@@ -31,23 +31,23 @@ async def main():
         print("TITULO:", await page.title())
 
         email = page.locator("input").nth(0)
-senha = page.locator("input").nth(1)
+        senha = page.locator("input").nth(1)
 
-await email.click()
-await email.fill(SHOPEE_EMAIL)
+        await email.click()
+        await email.fill(SHOPEE_EMAIL)
 
-await senha.click()
-await senha.fill(SHOPEE_SENHA)
+        await senha.click()
+        await senha.fill(SHOPEE_SENHA)
 
-print(
-    "EMAIL DIGITADO:",
-    await email.input_value()
-)
+        print(
+            "EMAIL DIGITADO:",
+            await email.input_value()
+        )
 
-print(
-    "SENHA TAMANHO:",
-    len(await senha.input_value())
-)
+        print(
+            "SENHA TAMANHO:",
+            len(await senha.input_value())
+        )
 
         print("EMAIL E SENHA PREENCHIDOS")
 
