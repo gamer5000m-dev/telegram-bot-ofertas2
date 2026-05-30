@@ -57,9 +57,24 @@ async def main():
             except:
                 pass
 
+        try:
+
+            await page.get_by_text(
+                "Aceitar todos os cookies",
+                exact=False
+            ).click(timeout=5000)
+
+            print("COOKIES ACEITOS")
+
+        except:
+
+            print("SEM POPUP DE COOKIES")
+
         print("CLICANDO EM ENTRAR...")
 
-        await botoes.nth(2).click()
+        await botoes.nth(2).click(
+            force=True
+        )
 
         await page.wait_for_timeout(10000)
 
