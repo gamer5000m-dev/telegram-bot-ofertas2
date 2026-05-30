@@ -41,17 +41,19 @@ async def receber_oferta(event):
 
         texto = event.raw_text or ""
 
+        # TROCA FRASE
         texto = re.sub(
-            r"📍.*",
-            "",
+            r".*Preço e estoque limitados.*",
+            "🔥 Oferta relâmpago! Aproveite já!",
             texto
-        ).strip()
+        )
 
+        # TROCA LINK POR MARCADOR
         texto = re.sub(
             r"https?://[^\s]+",
-            "",
+            "{LINK}",
             texto
-        ).strip()
+        )
 
         if not texto and not event.photo:
             return
@@ -104,29 +106,21 @@ async def responder_link(event):
 
     try:
 
-        print("MENSAGEM RECEBIDA EM ME")
-        print(event.raw_text)
-
         if not event.is_reply:
             return
 
         resposta = await event.get_reply_message()
 
-        print("RESPONDENDO MSG:", resposta.id)
-
         if resposta.id not in ofertas_pendentes:
-
-            print("OFERTA NAO ENCONTRADA")
-            print("OFERTAS:", list(ofertas_pendentes.keys()))
             return
 
         link = event.raw_text.strip()
 
         dados = ofertas_pendentes[resposta.id]
 
-        texto_final = (
-            f"{dados['texto']}\n\n"
-            f"{link}"
+        texto_final = dados["texto"].replace(
+            "{LINK}",
+            link
         )
 
         if dados["foto"]:
@@ -146,13 +140,13 @@ async def responder_link(event):
                 link_preview=False
             )
 
-        print("OFERTA PUBLICADA")
-
         await event.reply(
             "✅ Oferta publicada."
         )
 
         del ofertas_pendentes[resposta.id]
+
+        print("OFERTA PUBLICADA")
 
     except Exception as e:
 
